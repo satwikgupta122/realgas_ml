@@ -2,6 +2,7 @@
 
 **Authors:** Satwik Gupta (`2025CH11012`) & Udhav Jaipuria (`2025CH11729`)  
 **Course Project:** Chemical Engineering Thermodynamics · Department of Chemical Engineering  
+**Live Web Application:** [**`https://satwikgupta122.github.io/realgas_ml/`**](https://satwikgupta122.github.io/realgas_ml/)  
 **Technical Report:** [**`report/realgas_ml_report.pdf`**](report/realgas_ml_report.pdf) ([LaTeX Source](report/realgas_ml_report.tex))
 
 `realgas-ml` is a self-contained thermodynamic calculation engine and local kernel regression package that predicts the pressure–volume–temperature ($PVT$), caloric ($h, s$), and phase-equilibrium departure ($\phi, f$) properties of **15 pure supercritical fluids**. Each fluid is trained on **$65{,}536$ analytical states** ($983{,}040$ states in total) synthesized directly from the classical [Peng–Robinson (1976) cubic equation of state](https://doi.org/10.1021/i160057a011) coupled with continuous [NASA 7-coefficient ideal-gas heat-capacity polynomials](https://ntrs.nasa.gov/citations/19940013151). No external runtime property library (such as CoolProp or Cantera) is called during training or inference.

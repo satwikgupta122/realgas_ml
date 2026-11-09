@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Real Gas Lab — realgas-ml v0.3.0</title>
+  <style>
+    :root {
+      --teal: #087f8c;
+      --teal-dark: #065f69;
+      --slate: #17313b;
+      --amber: #e6a23c;
+      --bg: #f7fafa;
+      --card: #f0f5f5;
+      --border: #d8e4e6;
+      --text: #1c2d33;
+      --muted: #5a7178;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+    /* Sidebar */
+    .sidebar {
+      width: 330px;
+      background: #ffffff;
+      border-right: 1px solid var(--border);
+      padding: 24px 20px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .sidebar h2 {
+      margin: 0 0 4px 0;
+      font-size: 1.15rem;
+      color: var(--slate);
+    }
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .field-group label {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--slate);
+    }
+    .field-group select,
+    .field-group input[type="number"] {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 0.92rem;
+      background: #fff;
+      color: var(--text);
+    }
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.88rem;
+    }
+    .caption {
+      font-size: 0.77rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .sidebar-links {
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.84rem;
+    }
+    .sidebar-links a {
+      color: var(--teal);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .sidebar-links a:hover { text-decoration: underline; }
+
+    /* Main Content */
+    .main {
+      flex: 1;
+      max-width: 1180px;
+      padding: 28px 36px 48px 36px;
+      margin: 0 auto;
+    }
+    .eyebrow {
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--teal);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    h1 {
+      margin: 0 0 6px 0;
+      font-size: 2rem;
+      color: var(--slate);
+    }
+    .subtitle {
+      margin: 0 0 20px 0;
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+    .state-banner {
+      margin-bottom: 14px;
+    }
+    .state-banner h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      color: var(--slate);
+    }
+    .error-box {
+      background: #fdecea;
+      color: #b71c1c;
+      border: 1px solid #f5c6cb;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: none;
+      font-size: 0.9rem;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+    .metric-label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .metric-value {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--slate);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 18px;
+    }
+    .tab-btn {
+      padding: 10px 16px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      color: var(--teal);
+      border-bottom-color: var(--teal);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid #eef3f4;
+    }
+    th {
+      background: var(--card);
+      color: var(--slate);
+      font-weight: 600;
+    }
+    td.num, th.num {
+      text-align: right;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.86rem;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 9px 16px;
+      background: var(--teal);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--teal-dark); }
+    .chart-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 10px;
+    }
+    canvas {
+      width: 100%;
+      height: 360px;
+      display: block;
+    }
+    .notes-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      line-height: 1.6;
+      font-size: 0.93rem;
+    }
+    @media (max-width: 900px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+      .main { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>Set your state</h2>
+    <div class="field-group">
+      <label for="gasSelect">Gas</label>
+      <select id="gasSelect"></select>
+    </div>
+    <div class="field-group">
+      <label>Calculate from</label>
+      <div class="radio-group">
+        <label><input type="radio" name="calcMode" value="tp" checked /> Temperature + pressure</label>
+        <label><input type="radio" name="calcMode" value="tv" /> Temperature + molar volume</label>
+      </div>
+    </div>
+    <div class="field-group">
+      <label for="tempUnit">Temperature unit</label>
+      <select id="tempUnit">
+        <option value="K">K</option>
+        <option value="C">°C</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label for="tempInput" id="tempLabel">Temperature (K)</label>
+      <input type="number" id="tempInput" step="any" value="400" />
+      <div class="caption" id="tempRangeCaption"></div>
+    </div>
+    <div class="field-group">
+      <label for="amountInput">Amount (mol)</label>
+      <input type="number" id="amountInput" step="0.1" min="0.000001" value="1.0" />
+    </div>
+
+    <div id="pressureControls">
+      <div class="field-group" style="margin-bottom:10px;">
+        <label for="pUnit">Pressure unit</label>
+        <select id="pUnit">
+          <option value="bar">bar</option>
+          <option value="kPa">kPa</option>
+          <option value="MPa">MPa</option>
+          <option value="Pa">Pa</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label for="pressureInput" id="pressureLabel">Pressure (bar)</label>
+        <input type="number" id="pressureInput" step="any" value="20" />
+        <div class="caption" id="pressureRangeCaption"></div>
+      </div>
+    </div>
+
+    <div id="volumeControls" style="display:none;">
+      <div class="field-group">
+        <label for="volumeInput">Molar volume (L/mol)</label>
+        <input type="number" id="volumeInput" step="any" value="1.6" />
+        <div class="caption" id="volumeRangeCaption"></div>
+      </div>
+    </div>
+
+    <div class="caption">Results update automatically as you adjust inputs.</div>
+
+    <div class="sidebar-links">
+      <div><strong>Project Resources</strong></div>
+      <a href="realgas_ml_report.pdf" target="_blank">📄 Technical Report (PDF)</a>
+      <a href="realgas_ml_report.tex" target="_blank">📝 LaTeX Source (.tex)</a>
+      <a href="https://github.com/satwikgupta122/realgas_ml" target="_blank">💻 GitHub Repository</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="eyebrow">Chemical Engineering Thermodynamics · S. Gupta &amp; U. Jaipuria</div>
+    <h1>Real gas lab (realgas-ml v0.3.0)</h1>
+    <p class="subtitle">Explore supercritical PVT behaviour, caloric departures, and fugacity for 15 pure fluids via 48-neighbor local quintic RBF surrogates and analytical Peng–Robinson (1976) calculations.</p>
+
+    <div id="errorBox" class="error-box"></div>
+
+    <div id="resultsContent">
+      <div class="state-banner">
+        <h3 id="stateHeader">CarbonDioxide · 400.00 K · 20.0000 bar</h3>
+        <div class="caption" id="stateSubheader">1 mol · Local quintic RBF surrogate (k=48, m=2) trained on 65,536 Peng–Robinson states</div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Compressibility, Z</div>
+          <div class="metric-value" id="metricZ">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Molar volume · L/mol</div>
+          <div class="metric-value" id="metricV">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Fugacity · bar</div>
+          <div class="metric-value" id="metricF">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Density · kg/m³</div>
+          <div class="metric-value" id="metricRho">—</div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="tabProps">All properties</button>
+        <button class="tab-btn" data-tab="tabPlot">Pressure trends</button>
+        <button class="tab-btn" data-tab="tabBench">Validation benchmarks</button>
+        <button class="tab-btn" data-tab="tabNotes">Report &amp; theory</button>
+      </div>
+
+      <div id="tabProps" class="tab-panel active">
+        <label style="display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;font-size:0.9rem;font-weight:500;">
+          <input type="checkbox" id="compareCheck" checked /> Compare with direct Peng–Robinson (PR76)
+        </label>
+        <table>
+          <thead>
+            <tr id="propTableHead"></tr>
+          </thead>
+          <tbody id="propTableBody"></tbody>
+        </table>
+        <button class="btn" id="downloadPropsBtn">Download results as CSV</button>
+      </div>
+
+      <div id="tabPlot" class="tab-panel">
+        <div class="field-group" style="max-width:340px;margin-bottom:10px;">
+          <label for="plotPropSelect">Property to plot (80 geometric pressure nodes, 1–50 bar)</label>
+          <select id="plotPropSelect"></select>
+        </div>
+        <div class="caption" id="plotCaption"></div>
+        <div class="chart-box">
+          <canvas id="trendCanvas" width="960" height="360"></canvas>
+        </div>
+        <div class="caption" style="margin-top:6px;">Teal solid line: Local Quintic RBF Surrogate · Amber dashed markers: Direct Peng–Robinson EOS (curves overlap to 8–10 digits).</div>
+        <button class="btn" id="downloadCurveBtn">Download curve as CSV</button>
+      </div>
+
+      <div id="tabBench" class="tab-panel">
+        <p class="caption" style="font-size:0.88rem;margin-bottom:12px;">Held-out interior test (N = 2,048) and domain-boundary test (N = 256) surrogate accuracy for the selected fluid from <code>realgas_ml/data/&lt;Fluid&gt;_metrics.json</code>:</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Evaluation Split</th>
+              <th class="num">v MAPE (%)</th>
+              <th class="num">v Max APE (%)</th>
+              <th class="num">f MAPE (%)</th>
+              <th class="num">f Max APE (%)</th>
+              <th class="num">h MAE (J/mol)</th>
+              <th class="num">h Max AE (J/mol)</th>
+              <th class="num">s MAE (J/mol·K)</th>
+              <th class="num">s Max AE (J/mol·K)</th>
+            </tr>
+          </thead>
+          <tbody id="benchSplitBody"></tbody>
+        </table>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px;">
+          <div class="chart-box"><img src="fig_learning_curves.png" alt="Validation Learning Curves" style="width:100%;height:auto;" /></div>
+          <div class="chart-box"><img src="fig_test_boundary_errors.png" alt="Boundary and Interior Errors" style="width:100%;height:auto;" /></div>
+        </div>
+      </div>
+
+      <div id="tabNotes" class="tab-panel">
+        <div class="notes-card">
+          <p><strong>Z</strong> measures departure from ideal-gas volume: <em>Z = 1</em> is ideal at that state.</p>
+          <p><strong>Fugacity</strong> is <em>f = φP</em>. Its coefficient <em>φ</em> measures departure from ideal-gas chemical potential. Fugacity has pressure units and is an intensive property (it does not scale with molar amount <em>n</em>).</p>
+          <p><strong>h and s</strong> are molar properties; <strong>H = nh</strong> and <strong>S = ns</strong> are extensive totals. The ideal-gas reference state is <em>h<sub>ig</sub> = s<sub>ig</sub> = 0</em> at 300 K and 1 bar, with analytical PR76 departures added at the actual state.</p>
+          <p><strong>Scope &amp; Accuracy:</strong> 15 pure supercritical gases above 1.10 <em>T<sub>c</sub></em> across 1–50 bar. Each fluid surrogate uses 48-neighbor local quintic RBF interpolation (<em>φ(r) = −r<sup>5</sup></em>) augmented by a quadratic polynomial on a 256 × 256 normalized (<em>T</em>, ln <em>P</em>) grid.</p>
+          <p><a class="btn" href="realgas_ml_report.pdf" target="_blank">Open Full 4-Page Technical Report (PDF)</a></p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const FLUID_DATA = {"package_version": "0.3.0", "source": "Peng-Robinson 1976, implemented directly in realgas_ml/peng_robinson.py", "data_kind": "analytical EOS generated; not experimental measurements", "method": "local quintic RBF kernel regression", "reference_state": "Ideal-gas h=0, s=0 at 300 K and 100000 Pa; add PR departure at actual T,P.", "ideal_reference_T_K": 300.0, "ideal_reference_P_Pa": 100000.0, "source_nasa_url": "https://ntrs.nasa.gov/citations/19940013151", "source_coefficients_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/nasa_gas.yaml", "source_coefficient_file_sha256": "4de6199d65d2d3db782e30573720c723130953707336add59713b02d8667e4db", "fluids": {"Nitrogen": {"Tc_K": 126.2, "Pc_Pa": 3390000.0, "acentric_factor": 0.038, "molar_mass_kg_mol": 0.02801348, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [300.0, 600.0], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml", "critical_source_note": "The acentric factor is calculated using the pure fluid saturation data from\nLemmon et al. (2022).", "nasa_species": "N2", "nasa_temperature_ranges_K": [200.0, 1000.0, 6000.0], "nasa7_coefficients": [[3.53100528, -0.000123660987, -5.02999437e-07, 2.43530612e-09, -1.40881235e-12, -1046.97628, 2.96747468], [2.95257626, 0.00139690057, -4.92631691e-07, 7.86010367e-11, -4.60755321e-15, -923.948645, 5.87189252]], "nasa_source_note": "TPIS78"}, "Oxygen": {"Tc_K": 154.58, "Pc_Pa": 5043000.0, "acentric_factor": 0.022, "molar_mass_kg_mol": 0.0319988, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [300.0, 600.0], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml", "critical_source_note": "The acentric factor is calculated using the pure fluid saturation data from\nLemmon et al. (2022).", "nasa_species": "O2", "nasa_temperature_ranges_K": [200.0, 1000.0, 6000.0], "nasa7_coefficients": [[3.78245636, -0.00299673415, 9.847302e-06, -9.68129508e-09, 3.24372836e-12, -1063.94356, 3.65767573], [3.66096083, 0.000656365523, -1.41149485e-07, 2.05797658e-11, -1.29913248e-15, -1215.97725, 3.41536184]], "nasa_source_note": "TPIS89"}, "CarbonDioxide": {"Tc_K": 304.2, "Pc_Pa": 7390000.0, "acentric_factor": 0.228, "molar_mass_kg_mol": 0.0440098, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [334.62, 600.0], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml", "critical_source_note": "The acentric factor is taken from Yaws (2001).", "nasa_species": "CO2", "nasa_temperature_ranges_K": [200.0, 1000.0, 6000.0], "nasa7_coefficients": [[2.35677352, 0.00898459677, -7.12356269e-06, 2.45919022e-09, -1.43699548e-13, -48371.9697, 9.90105222], [4.63659493, 0.00274131991, -9.95828531e-07, 1.60373011e-10, -9.16103468e-15, -49024.9341, -1.93534855]], "nasa_source_note": "L 7/88"}, "Hydrogen": {"Tc_K": 32.98, "Pc_Pa": 1293000.0, "acentric_factor": -0.217, "molar_mass_kg_mol": 0.00201588, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [300.0, 600.0], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml", "critical_source_note": "Properties of Gases and Liquids, 5th edition, Poling.", "nasa_species": "H2", "nasa_temperature_ranges_K": [200.0, 1000.0, 6000.0], "nasa7_coefficients": [[2.34433112, 0.00798052075, -1.9478151e-05, 2.01572094e-08, -7.37611761e-12, -917.935173, 0.683010238], [2.93286579, 0.000826607967, -1.46402335e-07, 1.54100359e-11, -6.88804432e-16, -813.065597, -1.02432887]], "nasa_source_note": "TPIS78"}, "Helium": {"Tc_K": 5.1953, "Pc_Pa": 228322.7892147868, "acentric_factor": -0.38353992538323034, "molar_mass_kg_mol": 0.004002602, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [300.0, 600.0], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://coolprop.org/fluid_properties/fluids/Helium.html", "critical_source_note": "Tabulated static constants only; no property-library calls.", "nasa_species": "He", "nasa_temperature_ranges_K": [200.0, 6000.0], "nasa7_coefficients": [[2.5, 0.0, 0.0, 0.0, 0.0, -745.375, 0.928724724]], "nasa_source_note": "L10/90"}, "Argon": {"Tc_K": 150.687, "Pc_Pa": 4863000.544876669, "acentric_factor": -0.00219, "molar_mass_kg_mol": 0.039948, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [300.0, 600.0], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://coolprop.org/fluid_properties/fluids/Argon.html", "critical_source_note": "Tabulated static constants only; no property-library calls.", "nasa_species": "Ar", "nasa_temperature_ranges_K": [200.0, 6000.0], "nasa7_coefficients": [[2.5, 0.0, 0.0, 0.0, 0.0, -745.375, 4.37967491]], "nasa_source_note": "L 6/88"}, "Neon": {"Tc_K": 44.4, "Pc_Pa": 2661630.706279463, "acentric_factor": -0.03549258024442481, "molar_mass_kg_mol": 0.020179, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [300.0, 600.0], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://coolprop.org/fluid_properties/fluids/Neon.html", "critical_source_note": "Tabulated static constants only; no property-library calls.", "nasa_species": "Ne", "nasa_temperature_ranges_K": [200.0, 6000.0], "nasa7_coefficients": [[2.5, 0.0, 0.0, 0.0, 0.0, -745.375, 3.35532272]], "nasa_source_note": "L10/90"}, "Methane": {"Tc_K": 190.7, "Pc_Pa": 4630000.0, "acentric_factor": 0.011, "molar_mass_kg_mol": 0.0160428, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [300.0, 600.0], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml", "critical_source_note": "Initial database of critical properties compiled from various sources by\nC. Karakaya (https://orcid.org/0000-0001-5102-5476)\n\nAdditional data sources:\n\nLemmon, E W; Bell, I H; Huber, M L; and McLinden, M O. (2022). \"Thermophysical\n    Properties of Fluid Systems\" in NIST Chemistry WebBook, NIST Standard Reference\n    Database Number 69, Eds. P J  Linstrom and W G Mallard, National Institute of\n    Standards and Technology, Gaithersburg MD, 20899, https://doi.org/10.18434/T4D303.\n\nYaws, C L. (2001). Matheson Gas Data Book. 7th Edition McGraw-Hill.\n    ISBN 978-0-07-135854-5.", "nasa_species": "CH4", "nasa_temperature_ranges_K": [200.0, 1000.0, 6000.0], "nasa7_coefficients": [[5.14987613, -0.0136709788, 4.91800599e-05, -4.84743026e-08, 1.66693956e-11, -10246.6476, -4.64130376], [1.63552643, 0.0100842795, -3.36916254e-06, 5.34958667e-10, -3.15518833e-14, -10005.6455, 9.99313326]], "nasa_source_note": "L 8/88"}, "Ethane": {"Tc_K": 305.4, "Pc_Pa": 4880000.0, "acentric_factor": 0.099, "molar_mass_kg_mol": 0.03006904, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [335.94, 600.0], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml", "critical_source_note": "Initial database of critical properties compiled from various sources by\nC. Karakaya (https://orcid.org/0000-0001-5102-5476)\n\nAdditional data sources:\n\nLemmon, E W; Bell, I H; Huber, M L; and McLinden, M O. (2022). \"Thermophysical\n    Properties of Fluid Systems\" in NIST Chemistry WebBook, NIST Standard Reference\n    Database Number 69, Eds. P J  Linstrom and W G Mallard, National Institute of\n    Standards and Technology, Gaithersburg MD, 20899, https://doi.org/10.18434/T4D303.\n\nYaws, C L. (2001). Matheson Gas Data Book. 7th Edition McGraw-Hill.\n    ISBN 978-0-07-135854-5.", "nasa_species": "C2H6", "nasa_temperature_ranges_K": [200.0, 1000.0, 6000.0], "nasa7_coefficients": [[4.29142492, -0.0055015427, 5.99438288e-05, -7.08466285e-08, 2.68685771e-11, -11522.2055, 2.66682316], [4.04666674, 0.0153538766, -5.47039321e-06, 8.77826228e-10, -5.23167305e-14, -12447.3512, -0.968683607]], "nasa_source_note": "L 8/88"}, "Propane": {"Tc_K": 369.7, "Pc_Pa": 4250000.0, "acentric_factor": 0.153, "molar_mass_kg_mol": 0.04409562, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [406.8790098460598, 628.8130152166378], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml", "critical_source_note": "Initial database of critical properties compiled from various sources by\nC. Karakaya (https://orcid.org/0000-0001-5102-5476)\n\nAdditional data sources:\n\nLemmon, E W; Bell, I H; Huber, M L; and McLinden, M O. (2022). \"Thermophysical\n    Properties of Fluid Systems\" in NIST Chemistry WebBook, NIST Standard Reference\n    Database Number 69, Eds. P J  Linstrom and W G Mallard, National Institute of\n    Standards and Technology, Gaithersburg MD, 20899, https://doi.org/10.18434/T4D303.\n\nYaws, C L. (2001). Matheson Gas Data Book. 7th Edition McGraw-Hill.\n    ISBN 978-0-07-135854-5.", "nasa_species": "C3H8", "nasa_temperature_ranges_K": [200.0, 1000.0, 6000.0], "nasa7_coefficients": [[4.2110262, 0.00171599803, 7.06183472e-05, -9.19594116e-08, 3.64421372e-11, -14381.2106, 5.60930491], [6.66789363, 0.0206120214, -7.36553027e-06, 1.18440761e-09, -7.0695321e-14, -16274.8521, -13.1859503]], "nasa_source_note": "L 6/90"}, "n-Butane": {"Tc_K": 425.6, "Pc_Pa": 3760000.0, "acentric_factor": 0.199, "molar_mass_kg_mol": 0.0581222, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [468.1600000000001, 574.0], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml", "critical_source_note": "Initial database of critical properties compiled from various sources by\nC. Karakaya (https://orcid.org/0000-0001-5102-5476)\n\nAdditional data sources:\n\nLemmon, E W; Bell, I H; Huber, M L; and McLinden, M O. (2022). \"Thermophysical\n    Properties of Fluid Systems\" in NIST Chemistry WebBook, NIST Standard Reference\n    Database Number 69, Eds. P J  Linstrom and W G Mallard, National Institute of\n    Standards and Technology, Gaithersburg MD, 20899, https://doi.org/10.18434/T4D303.\n\nYaws, C L. (2001). Matheson Gas Data Book. 7th Edition McGraw-Hill.\n    ISBN 978-0-07-135854-5.", "nasa_species": "C4H10,n-butane", "nasa_temperature_ranges_K": [200.0, 1000.0, 6000.0], "nasa7_coefficients": [[6.14746806, 0.000155947389, 9.67913517e-05, -1.2548391e-07, 4.97816555e-11, -17599.4402, -1.09409879], [9.44535834, 0.0257858073, -9.23619122e-06, 1.48632755e-09, -8.87897158e-14, -20138.2165, -26.3470076]], "nasa_source_note": "L 6/90"}, "CarbonMonoxide": {"Tc_K": 133.4, "Pc_Pa": 3500000.0, "acentric_factor": 0.066, "molar_mass_kg_mol": 0.0280101, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [300.0, 499.0], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml", "critical_source_note": "Initial database of critical properties compiled from various sources by\nC. Karakaya (https://orcid.org/0000-0001-5102-5476)\n\nAdditional data sources:\n\nLemmon, E W; Bell, I H; Huber, M L; and McLinden, M O. (2022). \"Thermophysical\n    Properties of Fluid Systems\" in NIST Chemistry WebBook, NIST Standard Reference\n    Database Number 69, Eds. P J  Linstrom and W G Mallard, National Institute of\n    Standards and Technology, Gaithersburg MD, 20899, https://doi.org/10.18434/T4D303.\n\nYaws, C L. (2001). Matheson Gas Data Book. 7th Edition McGraw-Hill.\n    ISBN 978-0-07-135854-5.", "nasa_species": "CO", "nasa_temperature_ranges_K": [200.0, 1000.0, 6000.0], "nasa7_coefficients": [[3.57953347, -0.00061035368, 1.01681433e-06, 9.07005884e-10, -9.04424499e-13, -14344.086, 3.50840928], [3.04848583, 0.00135172818, -4.85794075e-07, 7.88536486e-11, -4.69807489e-15, -14266.1171, 6.0170979]], "nasa_source_note": "TPIS79"}, "Ammonia": {"Tc_K": 405.56, "Pc_Pa": 11363391.157414673, "acentric_factor": 0.2556905229865023, "molar_mass_kg_mol": 0.01703052, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [446.11600000000004, 689.451999954548], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://coolprop.org/fluid_properties/fluids/Ammonia.html", "critical_source_note": "Tabulated static constants only; no property-library calls.", "nasa_species": "NH3", "nasa_temperature_ranges_K": [200.0, 1000.0, 6000.0], "nasa7_coefficients": [[4.30177808, -0.0047712733, 2.19341619e-05, -2.29856489e-08, 8.28992268e-12, -6748.06394, -0.690644393], [2.71709692, 0.00556856338, -1.76886396e-06, 2.6741726e-10, -1.52731419e-14, -6584.51989, 6.09289837]], "nasa_source_note": "TPIS89"}, "SulfurDioxide": {"Tc_K": 430.64, "Pc_Pa": 7886578.976938645, "acentric_factor": 0.2561299361987246, "molar_mass_kg_mol": 0.0640638, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [473.7040006952699, 524.0], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://coolprop.org/fluid_properties/fluids/SulfurDioxide.html", "critical_source_note": "Tabulated static constants only; no property-library calls.", "nasa_species": "SO2", "nasa_temperature_ranges_K": [300.0, 1000.0, 5000.0], "nasa7_coefficients": [[3.2665338, 0.0053237902, 6.8437552e-07, -5.2810047e-09, 2.5590454e-12, -36908.148, 9.66465108], [5.2451364, 0.0019704204, -8.0375769e-07, 1.5149969e-10, -1.0558004e-14, -37558.227, -1.07404892]], "nasa_source_note": "J 6/61"}, "Water": {"Tc_K": 647.096, "Pc_Pa": 22064000.0, "acentric_factor": 0.3442920843, "molar_mass_kg_mol": 0.018015268, "gas_constant_J_mol_K": 8.31446261815324, "T_range_K": [711.8056, 1100.0631999999782], "P_range_Pa": [100000.0, 5000000.0], "critical_source_url": "https://coolprop.org/fluid_properties/fluids/Water.html", "critical_source_note": "Tabulated static constants only; no property-library calls.", "nasa_species": "H2O", "nasa_temperature_ranges_K": [200.0, 1000.0, 6000.0], "nasa7_coefficients": [[4.19864056, -0.0020364341, 6.52040211e-06, -5.48797062e-09, 1.77197817e-12, -30293.7267, -0.849032208], [2.67703787, 0.00297318329, -7.7376969e-07, 9.44336689e-11, -4.26900959e-15, -29885.8938, 6.88255571]], "nasa_source_note": "L 8/89"}}};
+    const METRICS_DATA = {"Nitrogen": {"validation": {"v_MAPE_percent": 1.611172371733527e-09, "v_max_APE_percent": 1.8594956685547004e-07, "fugacity_MAPE_percent": 1.4127254054085991e-09, "fugacity_max_APE_percent": 1.5527747976307182e-07, "h_J_mol_MAE": 4.061286594525537e-08, "h_J_mol_max_AE": 1.4290901049207605e-06, "s_J_mol_K_MAE": 4.3747333433228307e-10, "s_J_mol_K_max_AE": 4.023169974942675e-08}, "test": {"v_MAPE_percent": 1.1583244617380944e-09, "v_max_APE_percent": 3.117077929104539e-07, "fugacity_MAPE_percent": 1.0593551914590132e-09, "fugacity_max_APE_percent": 2.4568318490736374e-07, "h_J_mol_MAE": 4.160255837742932e-08, "h_J_mol_max_AE": 2.638428611589916e-06, "s_J_mol_K_MAE": 4.22345602462437e-10, "s_J_mol_K_max_AE": 4.3913630065617326e-08}, "boundary": {"v_MAPE_percent": 1.8443389610683925e-09, "v_max_APE_percent": 5.897141663879779e-08, "fugacity_MAPE_percent": 1.8304185857992428e-09, "fugacity_max_APE_percent": 5.4337823129912977e-08, "h_J_mol_MAE": 9.152071467344314e-08, "h_J_mol_max_AE": 2.0854871536357678e-06, "s_J_mol_K_MAE": 4.1257606949981e-10, "s_J_mol_K_max_AE": 2.2318245890273758e-08}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 5.445841226147524e-06, "v_max_APE_percent": 0.0002834704074805572, "fugacity_MAPE_percent": 5.039876891082401e-06, "fugacity_max_APE_percent": 0.00020292011302380786, "h_J_mol_MAE": 0.00011419052174672928, "h_J_mol_max_AE": 0.0038626568741904066, "s_J_mol_K_MAE": 1.1243053248516626e-06, "s_J_mol_K_max_AE": 2.7624950051485797e-05}, {"points": 4096, "v_MAPE_percent": 3.4353430117955996e-07, "v_max_APE_percent": 2.699561783003901e-05, "fugacity_MAPE_percent": 3.0766535345869844e-07, "fugacity_max_APE_percent": 1.9339958345909736e-05, "h_J_mol_MAE": 7.281638711956195e-06, "h_J_mol_max_AE": 0.0004205481521069032, "s_J_mol_K_MAE": 7.012338687178272e-08, "s_J_mol_K_max_AE": 2.2223154041434157e-06}, {"points": 16384, "v_MAPE_percent": 1.9951318938962737e-08, "v_max_APE_percent": 1.477017619322396e-06, "fugacity_MAPE_percent": 1.7574355881157244e-08, "fugacity_max_APE_percent": 1.206982935819667e-06, "h_J_mol_MAE": 4.0808351629839645e-07, "h_J_mol_max_AE": 1.8891122465447552e-05, "s_J_mol_K_MAE": 4.360266488010389e-09, "s_J_mol_K_max_AE": 3.3416348887982394e-07}, {"points": 65536, "v_MAPE_percent": 1.611172371733527e-09, "v_max_APE_percent": 1.8594956685547004e-07, "fugacity_MAPE_percent": 1.4127254054085991e-09, "fugacity_max_APE_percent": 1.5527747976307182e-07, "h_J_mol_MAE": 4.061286594525537e-08, "h_J_mol_max_AE": 1.4290901049207605e-06, "s_J_mol_K_MAE": 4.3747333433228307e-10, "s_J_mol_K_max_AE": 4.023169974942675e-08}]}, "Oxygen": {"validation": {"v_MAPE_percent": 1.87973304456579e-09, "v_max_APE_percent": 2.7119986256707307e-07, "fugacity_MAPE_percent": 1.4962533165588376e-09, "fugacity_max_APE_percent": 1.7075971747715357e-07, "h_J_mol_MAE": 5.6269691545152156e-08, "h_J_mol_max_AE": 1.8501777958590537e-06, "s_J_mol_K_MAE": 3.8961230425173417e-10, "s_J_mol_K_max_AE": 3.3601810223160555e-08}, "test": {"v_MAPE_percent": 1.2980958810030613e-09, "v_max_APE_percent": 1.9048467247984036e-07, "fugacity_MAPE_percent": 1.1038866598155755e-09, "fugacity_max_APE_percent": 1.1987468795382483e-07, "h_J_mol_MAE": 6.17412074296192e-08, "h_J_mol_max_AE": 4.285273064397188e-06, "s_J_mol_K_MAE": 4.5713267796026525e-10, "s_J_mol_K_max_AE": 4.2192956684061755e-08}, "boundary": {"v_MAPE_percent": 2.200802734497742e-09, "v_max_APE_percent": 9.135043832486645e-08, "fugacity_MAPE_percent": 2.086825764274769e-09, "fugacity_max_APE_percent": 7.17456316579046e-08, "h_J_mol_MAE": 8.467766430403367e-08, "h_J_mol_max_AE": 1.7687863191895303e-06, "s_J_mol_K_MAE": 4.0761657959555164e-10, "s_J_mol_K_max_AE": 1.7801561114083597e-08}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 3.6190162961682523e-06, "v_max_APE_percent": 0.00011693661934319977, "fugacity_MAPE_percent": 2.8722713330160687e-06, "fugacity_max_APE_percent": 8.862624798489094e-05, "h_J_mol_MAE": 0.00011677138298124556, "h_J_mol_max_AE": 0.010307904516139388, "s_J_mol_K_MAE": 1.0504825272349366e-06, "s_J_mol_K_max_AE": 2.5641995494929404e-05}, {"points": 4096, "v_MAPE_percent": 2.598132487581159e-07, "v_max_APE_percent": 2.7141240077632744e-05, "fugacity_MAPE_percent": 1.9870978181044802e-07, "fugacity_max_APE_percent": 1.6284540138578052e-05, "h_J_mol_MAE": 6.681969882599281e-06, "h_J_mol_max_AE": 0.0002107860569822151, "s_J_mol_K_MAE": 7.367168098880721e-08, "s_J_mol_K_max_AE": 2.624753495439336e-06}, {"points": 16384, "v_MAPE_percent": 2.339239184301345e-08, "v_max_APE_percent": 3.5459482683464216e-06, "fugacity_MAPE_percent": 1.756301144014566e-08, "fugacity_max_APE_percent": 2.293138257059013e-06, "h_J_mol_MAE": 5.18964191509319e-07, "h_J_mol_max_AE": 1.649312071094755e-05, "s_J_mol_K_MAE": 4.44019946139085e-09, "s_J_mol_K_max_AE": 3.647993285227358e-07}, {"points": 65536, "v_MAPE_percent": 1.87973304456579e-09, "v_max_APE_percent": 2.7119986256707307e-07, "fugacity_MAPE_percent": 1.4962533165588376e-09, "fugacity_max_APE_percent": 1.7075971747715357e-07, "h_J_mol_MAE": 5.6269691545152156e-08, "h_J_mol_max_AE": 1.8501777958590537e-06, "s_J_mol_K_MAE": 3.8961230425173417e-10, "s_J_mol_K_max_AE": 3.3601810223160555e-08}]}, "CarbonDioxide": {"validation": {"v_MAPE_percent": 4.041820719259681e-09, "v_max_APE_percent": 1.764869361764454e-07, "fugacity_MAPE_percent": 2.5869942906625587e-09, "fugacity_max_APE_percent": 8.073289814447548e-08, "h_J_mol_MAE": 3.0772257719746676e-07, "h_J_mol_max_AE": 1.0047641353594372e-05, "s_J_mol_K_MAE": 6.205915009313556e-10, "s_J_mol_K_max_AE": 1.760995260724485e-08}, "test": {"v_MAPE_percent": 4.7783379629375705e-09, "v_max_APE_percent": 9.963649016953013e-07, "fugacity_MAPE_percent": 2.713754362285853e-09, "fugacity_max_APE_percent": 4.802207520526736e-07, "h_J_mol_MAE": 3.779545535986806e-07, "h_J_mol_max_AE": 6.018555018272309e-05, "s_J_mol_K_MAE": 7.163260439592986e-10, "s_J_mol_K_max_AE": 1.4168214335086304e-07}, "boundary": {"v_MAPE_percent": 2.4705595121771173e-08, "v_max_APE_percent": 2.8396266671393278e-06, "fugacity_MAPE_percent": 9.461918835246275e-09, "fugacity_max_APE_percent": 7.597746431997621e-07, "h_J_mol_MAE": 1.0180049634378463e-06, "h_J_mol_max_AE": 8.979519816421089e-05, "s_J_mol_K_MAE": 3.360475371604922e-09, "s_J_mol_K_max_AE": 3.5928603381307767e-07}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 1.8981398376347047e-05, "v_max_APE_percent": 0.0016451315854482118, "fugacity_MAPE_percent": 7.247796933017997e-06, "fugacity_max_APE_percent": 0.0005719341324539329, "h_J_mol_MAE": 0.0009230360159682149, "h_J_mol_max_AE": 0.08672184260603899, "s_J_mol_K_MAE": 2.1600044507736997e-06, "s_J_mol_K_max_AE": 0.00024135630694743782}, {"points": 4096, "v_MAPE_percent": 9.287877752268622e-07, "v_max_APE_percent": 8.559744932856717e-05, "fugacity_MAPE_percent": 4.1420664851580385e-07, "fugacity_max_APE_percent": 3.073110934614931e-05, "h_J_mol_MAE": 5.690139216785184e-05, "h_J_mol_max_AE": 0.003113968103662046, "s_J_mol_K_MAE": 1.0902149864832917e-07, "s_J_mol_K_max_AE": 8.151390094468525e-06}, {"points": 16384, "v_MAPE_percent": 5.7595858746380124e-08, "v_max_APE_percent": 3.9109164462480805e-06, "fugacity_MAPE_percent": 3.0152223578182313e-08, "fugacity_max_APE_percent": 1.6479770215127587e-06, "h_J_mol_MAE": 4.272050120768256e-06, "h_J_mol_max_AE": 0.0002020140586864727, "s_J_mol_K_MAE": 7.910460912393183e-09, "s_J_mol_K_max_AE": 4.2505951469706815e-07}, {"points": 65536, "v_MAPE_percent": 4.041820719259681e-09, "v_max_APE_percent": 1.764869361764454e-07, "fugacity_MAPE_percent": 2.5869942906625587e-09, "fugacity_max_APE_percent": 8.073289814447548e-08, "h_J_mol_MAE": 3.0772257719746676e-07, "h_J_mol_max_AE": 1.0047641353594372e-05, "s_J_mol_K_MAE": 6.205915009313556e-10, "s_J_mol_K_max_AE": 1.760995260724485e-08}]}, "Hydrogen": {"validation": {"v_MAPE_percent": 1.2796418438765222e-09, "v_max_APE_percent": 9.239942144745328e-08, "fugacity_MAPE_percent": 1.2232347513380093e-09, "fugacity_max_APE_percent": 8.649636562552132e-08, "h_J_mol_MAE": 4.867933053875895e-08, "h_J_mol_max_AE": 2.3368284018943086e-06, "s_J_mol_K_MAE": 2.8859024681960905e-10, "s_J_mol_K_max_AE": 1.0459338284363184e-08}, "test": {"v_MAPE_percent": 6.473307187591232e-10, "v_max_APE_percent": 7.738811813595703e-08, "fugacity_MAPE_percent": 6.102875529153534e-10, "fugacity_max_APE_percent": 7.255280820572807e-08, "h_J_mol_MAE": 3.2300195984460295e-08, "h_J_mol_max_AE": 2.425063939881511e-06, "s_J_mol_K_MAE": 3.3226047080160757e-10, "s_J_mol_K_max_AE": 3.3974404622938437e-08}, "boundary": {"v_MAPE_percent": 8.936624877609045e-10, "v_max_APE_percent": 6.595038959389399e-08, "fugacity_MAPE_percent": 7.939141098006752e-10, "fugacity_max_APE_percent": 4.9526893697304786e-08, "h_J_mol_MAE": 2.9302654345076534e-08, "h_J_mol_max_AE": 2.4379041860811412e-06, "s_J_mol_K_MAE": 2.1613613622375322e-10, "s_J_mol_K_max_AE": 2.8163675835912727e-09}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 2.793840010403316e-06, "v_max_APE_percent": 8.890267035877031e-05, "fugacity_MAPE_percent": 2.7164063287794804e-06, "fugacity_max_APE_percent": 8.140603304784833e-05, "h_J_mol_MAE": 0.00014950720905090864, "h_J_mol_max_AE": 0.0018291465621587122, "s_J_mol_K_MAE": 1.2032896661016062e-06, "s_J_mol_K_max_AE": 2.302158318157055e-05}, {"points": 4096, "v_MAPE_percent": 1.8322348659984e-07, "v_max_APE_percent": 6.011041397968597e-06, "fugacity_MAPE_percent": 1.7575954094906088e-07, "fugacity_max_APE_percent": 5.720417339816208e-06, "h_J_mol_MAE": 9.136928949743384e-06, "h_J_mol_max_AE": 0.0001910519949888112, "s_J_mol_K_MAE": 6.940847180259468e-08, "s_J_mol_K_max_AE": 2.3812402822898093e-06}, {"points": 16384, "v_MAPE_percent": 1.3465438659931994e-08, "v_max_APE_percent": 6.033999744303742e-07, "fugacity_MAPE_percent": 1.2847035566442011e-08, "fugacity_max_APE_percent": 5.672184055782736e-07, "h_J_mol_MAE": 6.078282836219362e-07, "h_J_mol_max_AE": 2.243965536763426e-05, "s_J_mol_K_MAE": 4.345219265847991e-09, "s_J_mol_K_max_AE": 2.1186058773992045e-07}, {"points": 65536, "v_MAPE_percent": 1.2796418438765222e-09, "v_max_APE_percent": 9.239942144745328e-08, "fugacity_MAPE_percent": 1.2232347513380093e-09, "fugacity_max_APE_percent": 8.649636562552132e-08, "h_J_mol_MAE": 4.867933053875895e-08, "h_J_mol_max_AE": 2.3368284018943086e-06, "s_J_mol_K_MAE": 2.8859024681960905e-10, "s_J_mol_K_max_AE": 1.0459338284363184e-08}]}, "Helium": {"validation": {"v_MAPE_percent": 4.328693219840529e-10, "v_max_APE_percent": 3.287525807138536e-08, "fugacity_MAPE_percent": 3.491079387379914e-10, "fugacity_max_APE_percent": 2.563544931888373e-08, "h_J_mol_MAE": 1.2946398595531372e-08, "h_J_mol_max_AE": 8.905641379897133e-07, "s_J_mol_K_MAE": 2.5864601765549075e-10, "s_J_mol_K_max_AE": 3.1302100467200944e-08}, "test": {"v_MAPE_percent": 3.4617398466003924e-10, "v_max_APE_percent": 4.935591935151251e-08, "fugacity_MAPE_percent": 2.8035913976660887e-10, "fugacity_max_APE_percent": 3.9010350505463975e-08, "h_J_mol_MAE": 1.0176594902704117e-08, "h_J_mol_max_AE": 1.4824433947069338e-06, "s_J_mol_K_MAE": 2.548417533699533e-10, "s_J_mol_K_max_AE": 2.4410351073811398e-08}, "boundary": {"v_MAPE_percent": 1.2307328767224845e-09, "v_max_APE_percent": 1.3825083300389451e-07, "fugacity_MAPE_percent": 9.384801963330247e-10, "fugacity_max_APE_percent": 9.676803802705081e-08, "h_J_mol_MAE": 3.466706632025175e-08, "h_J_mol_max_AE": 2.1949736037640832e-06, "s_J_mol_K_MAE": 3.1458678262201445e-10, "s_J_mol_K_max_AE": 1.221716114385707e-08}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 1.6208745336806357e-06, "v_max_APE_percent": 5.038986479188878e-05, "fugacity_MAPE_percent": 1.3193733562708726e-06, "fugacity_max_APE_percent": 3.857949719687781e-05, "h_J_mol_MAE": 5.3840852646511866e-05, "h_J_mol_max_AE": 0.0011969148486059566, "s_J_mol_K_MAE": 8.204443866935426e-07, "s_J_mol_K_max_AE": 1.8931427373303222e-05}, {"points": 4096, "v_MAPE_percent": 1.0067483522183118e-07, "v_max_APE_percent": 5.156734861344603e-06, "fugacity_MAPE_percent": 8.09290335050325e-08, "fugacity_max_APE_percent": 4.033084999299774e-06, "h_J_mol_MAE": 3.2823466636112963e-06, "h_J_mol_max_AE": 0.0001387360816806904, "s_J_mol_K_MAE": 5.433313159300656e-08, "s_J_mol_K_max_AE": 2.1884733314436744e-06}, {"points": 16384, "v_MAPE_percent": 6.2758688870734325e-09, "v_max_APE_percent": 5.814659864711302e-07, "fugacity_MAPE_percent": 5.03105825229444e-09, "fugacity_max_APE_percent": 4.528268870984675e-07, "h_J_mol_MAE": 1.9622744959826854e-07, "h_J_mol_max_AE": 1.5731704138488567e-05, "s_J_mol_K_MAE": 3.3091286377401135e-09, "s_J_mol_K_max_AE": 2.3806413196325593e-07}, {"points": 65536, "v_MAPE_percent": 4.328693219840529e-10, "v_max_APE_percent": 3.287525807138536e-08, "fugacity_MAPE_percent": 3.491079387379914e-10, "fugacity_max_APE_percent": 2.563544931888373e-08, "h_J_mol_MAE": 1.2946398595531372e-08, "h_J_mol_max_AE": 8.905641379897133e-07, "s_J_mol_K_MAE": 2.5864601765549075e-10, "s_J_mol_K_max_AE": 3.1302100467200944e-08}]}, "Argon": {"validation": {"v_MAPE_percent": 1.7282082882819072e-09, "v_max_APE_percent": 2.7110094169557897e-07, "fugacity_MAPE_percent": 1.393825701558049e-09, "fugacity_max_APE_percent": 1.7593464463061537e-07, "h_J_mol_MAE": 6.329721545517142e-08, "h_J_mol_max_AE": 3.872133959248458e-06, "s_J_mol_K_MAE": 3.4716827786304087e-10, "s_J_mol_K_max_AE": 2.365990425801101e-08}, "test": {"v_MAPE_percent": 1.3878282312425327e-09, "v_max_APE_percent": 2.7159734461434937e-07, "fugacity_MAPE_percent": 1.1902708311160859e-09, "fugacity_max_APE_percent": 1.7846939481813706e-07, "h_J_mol_MAE": 6.194255454221309e-08, "h_J_mol_max_AE": 7.062749887154496e-06, "s_J_mol_K_MAE": 3.2522169932112704e-10, "s_J_mol_K_max_AE": 2.962103629045032e-08}, "boundary": {"v_MAPE_percent": 1.871290926033775e-09, "v_max_APE_percent": 3.3137603772104285e-08, "fugacity_MAPE_percent": 1.8078764613821408e-09, "fugacity_max_APE_percent": 3.1771130171165396e-08, "h_J_mol_MAE": 7.128297939418271e-08, "h_J_mol_max_AE": 8.650104064145125e-07, "s_J_mol_K_MAE": 2.9511716535162227e-10, "s_J_mol_K_max_AE": 5.3591968224298014e-09}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 4.8464817468257815e-06, "v_max_APE_percent": 0.0003961507798244668, "fugacity_MAPE_percent": 3.8424090571852546e-06, "fugacity_max_APE_percent": 0.00024667468019323735, "h_J_mol_MAE": 0.00011750966815292363, "h_J_mol_max_AE": 0.008987714872375818, "s_J_mol_K_MAE": 1.0299725865437517e-06, "s_J_mol_K_max_AE": 5.5887183130209905e-05}, {"points": 4096, "v_MAPE_percent": 2.65137418682497e-07, "v_max_APE_percent": 1.7359980941655806e-05, "fugacity_MAPE_percent": 1.8257042145447544e-07, "fugacity_max_APE_percent": 9.28487431384184e-06, "h_J_mol_MAE": 9.52411159581279e-06, "h_J_mol_max_AE": 0.0012725738576477852, "s_J_mol_K_MAE": 5.912765587401099e-08, "s_J_mol_K_max_AE": 2.233121153327744e-06}, {"points": 16384, "v_MAPE_percent": 1.7525815456005678e-08, "v_max_APE_percent": 1.5461026459107075e-06, "fugacity_MAPE_percent": 1.4117892423691492e-08, "fugacity_max_APE_percent": 9.949243651163897e-07, "h_J_mol_MAE": 6.118451024300642e-07, "h_J_mol_max_AE": 2.6385832839537215e-05, "s_J_mol_K_MAE": 3.999386652216619e-09, "s_J_mol_K_max_AE": 1.9633457526424536e-07}, {"points": 65536, "v_MAPE_percent": 1.7282082882819072e-09, "v_max_APE_percent": 2.7110094169557897e-07, "fugacity_MAPE_percent": 1.393825701558049e-09, "fugacity_max_APE_percent": 1.7593464463061537e-07, "h_J_mol_MAE": 6.329721545517142e-08, "h_J_mol_max_AE": 3.872133959248458e-06, "s_J_mol_K_MAE": 3.4716827786304087e-10, "s_J_mol_K_max_AE": 2.365990425801101e-08}]}, "Neon": {"validation": {"v_MAPE_percent": 5.987696016090949e-10, "v_max_APE_percent": 4.714042489695203e-08, "fugacity_MAPE_percent": 6.190258158497719e-10, "fugacity_max_APE_percent": 4.922424690079197e-08, "h_J_mol_MAE": 2.5115665013009103e-08, "h_J_mol_max_AE": 2.8589256544364616e-06, "s_J_mol_K_MAE": 2.0156522677621143e-10, "s_J_mol_K_max_AE": 6.8755348081595e-09}, "test": {"v_MAPE_percent": 5.485983791807952e-10, "v_max_APE_percent": 7.837244186958969e-08, "fugacity_MAPE_percent": 5.663552309423392e-10, "fugacity_max_APE_percent": 8.277190044481131e-08, "h_J_mol_MAE": 1.9843305003059558e-08, "h_J_mol_max_AE": 2.2123272174212616e-06, "s_J_mol_K_MAE": 3.144501862400225e-10, "s_J_mol_K_max_AE": 3.00481381998452e-08}, "boundary": {"v_MAPE_percent": 5.245376615697905e-10, "v_max_APE_percent": 2.592819292601689e-08, "fugacity_MAPE_percent": 5.458923677675864e-10, "fugacity_max_APE_percent": 2.5588731134007503e-08, "h_J_mol_MAE": 1.8396037547441235e-08, "h_J_mol_max_AE": 7.371239973963384e-07, "s_J_mol_K_MAE": 3.4915158161593143e-10, "s_J_mol_K_max_AE": 1.726229470477847e-08}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 1.8216063917041517e-06, "v_max_APE_percent": 4.781972613443486e-05, "fugacity_MAPE_percent": 1.9085274303868097e-06, "fugacity_max_APE_percent": 4.955410306539676e-05, "h_J_mol_MAE": 7.121908095285984e-05, "h_J_mol_max_AE": 0.0014781338550164946, "s_J_mol_K_MAE": 8.7196799694646e-07, "s_J_mol_K_max_AE": 1.93481870374157e-05}, {"points": 4096, "v_MAPE_percent": 1.0712017620585074e-07, "v_max_APE_percent": 4.598045300063802e-06, "fugacity_MAPE_percent": 1.1214985873569255e-07, "fugacity_max_APE_percent": 4.874493519935186e-06, "h_J_mol_MAE": 4.347179045953442e-06, "h_J_mol_max_AE": 0.00016243541722360533, "s_J_mol_K_MAE": 5.33358531993038e-08, "s_J_mol_K_max_AE": 2.4562113054571455e-06}, {"points": 16384, "v_MAPE_percent": 8.703786866584573e-09, "v_max_APE_percent": 4.0349106278370073e-07, "fugacity_MAPE_percent": 9.042705278149155e-09, "fugacity_max_APE_percent": 4.245535478730744e-07, "h_J_mol_MAE": 3.5575104639223865e-07, "h_J_mol_max_AE": 1.961238831427181e-05, "s_J_mol_K_MAE": 3.4767544644859812e-09, "s_J_mol_K_max_AE": 2.3611889066188496e-07}, {"points": 65536, "v_MAPE_percent": 5.987696016090949e-10, "v_max_APE_percent": 4.714042489695203e-08, "fugacity_MAPE_percent": 6.190258158497719e-10, "fugacity_max_APE_percent": 4.922424690079197e-08, "h_J_mol_MAE": 2.5115665013009103e-08, "h_J_mol_max_AE": 2.8589256544364616e-06, "s_J_mol_K_MAE": 2.0156522677621143e-10, "s_J_mol_K_max_AE": 6.8755348081595e-09}]}, "Methane": {"validation": {"v_MAPE_percent": 3.0655213610619736e-09, "v_max_APE_percent": 2.727393422219393e-07, "fugacity_MAPE_percent": 2.2151201662864994e-09, "fugacity_max_APE_percent": 1.3253902420018449e-07, "h_J_mol_MAE": 1.5314973830782286e-07, "h_J_mol_max_AE": 8.996264909910678e-06, "s_J_mol_K_MAE": 4.914129011482013e-10, "s_J_mol_K_max_AE": 2.1378159686946674e-08}, "test": {"v_MAPE_percent": 1.8532602806976134e-09, "v_max_APE_percent": 1.5963537158825147e-07, "fugacity_MAPE_percent": 1.4494449965350015e-09, "fugacity_max_APE_percent": 8.279419372314578e-08, "h_J_mol_MAE": 1.1632331261418605e-07, "h_J_mol_max_AE": 7.35604147905633e-06, "s_J_mol_K_MAE": 5.037577444185132e-10, "s_J_mol_K_max_AE": 8.038594931369936e-08}, "boundary": {"v_MAPE_percent": 1.0575730569062358e-08, "v_max_APE_percent": 1.3659376185692906e-06, "fugacity_MAPE_percent": 7.708866574598905e-09, "fugacity_max_APE_percent": 8.104497517535947e-07, "h_J_mol_MAE": 3.590045006274245e-07, "h_J_mol_max_AE": 3.6054651332051435e-05, "s_J_mol_K_MAE": 1.5428300212914914e-09, "s_J_mol_K_max_AE": 1.9956675600951712e-07}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 9.697431317483816e-06, "v_max_APE_percent": 0.0004951438294931165, "fugacity_MAPE_percent": 6.289418847489278e-06, "fugacity_max_APE_percent": 0.0002398977838602434, "h_J_mol_MAE": 0.00032901880970162556, "h_J_mol_max_AE": 0.007416037524990315, "s_J_mol_K_MAE": 1.5710688713457084e-06, "s_J_mol_K_max_AE": 3.3439578388083646e-05}, {"points": 4096, "v_MAPE_percent": 5.036441102709843e-07, "v_max_APE_percent": 4.697154336597009e-05, "fugacity_MAPE_percent": 3.3059423640464936e-07, "fugacity_max_APE_percent": 2.4018010802429046e-05, "h_J_mol_MAE": 1.97343470117739e-05, "h_J_mol_max_AE": 0.0006008942980315624, "s_J_mol_K_MAE": 8.981779622883965e-08, "s_J_mol_K_max_AE": 3.063314338191958e-06}, {"points": 16384, "v_MAPE_percent": 3.240747093423424e-08, "v_max_APE_percent": 1.754477652049502e-06, "fugacity_MAPE_percent": 2.2015040203153535e-08, "fugacity_max_APE_percent": 1.1109615893900582e-06, "h_J_mol_MAE": 1.506836193737593e-06, "h_J_mol_max_AE": 7.767396971303242e-05, "s_J_mol_K_MAE": 5.604633999630772e-09, "s_J_mol_K_max_AE": 1.561752949186257e-07}, {"points": 65536, "v_MAPE_percent": 3.0655213610619736e-09, "v_max_APE_percent": 2.727393422219393e-07, "fugacity_MAPE_percent": 2.2151201662864994e-09, "fugacity_max_APE_percent": 1.3253902420018449e-07, "h_J_mol_MAE": 1.5314973830782286e-07, "h_J_mol_max_AE": 8.996264909910678e-06, "s_J_mol_K_MAE": 4.914129011482013e-10, "s_J_mol_K_max_AE": 2.1378159686946674e-08}]}, "Ethane": {"validation": {"v_MAPE_percent": 1.998267200580689e-08, "v_max_APE_percent": 3.996831265951073e-06, "fugacity_MAPE_percent": 5.162722181185908e-09, "fugacity_max_APE_percent": 6.213672021360139e-07, "h_J_mol_MAE": 1.0175722509053742e-06, "h_J_mol_max_AE": 0.00021138657893970958, "s_J_mol_K_MAE": 2.240598978922592e-09, "s_J_mol_K_max_AE": 6.04787544489227e-07}, "test": {"v_MAPE_percent": 1.7291498528165805e-08, "v_max_APE_percent": 7.530437606817486e-06, "fugacity_MAPE_percent": 5.376294190655856e-09, "fugacity_max_APE_percent": 1.0550399442976754e-06, "h_J_mol_MAE": 8.641822276667099e-07, "h_J_mol_max_AE": 0.000277722636838007, "s_J_mol_K_MAE": 2.1744881813408074e-09, "s_J_mol_K_max_AE": 7.854968266940432e-07}, "boundary": {"v_MAPE_percent": 5.2778106754761134e-08, "v_max_APE_percent": 2.250546993209923e-06, "fugacity_MAPE_percent": 1.3870439389065958e-08, "fugacity_max_APE_percent": 4.2573735647977173e-07, "h_J_mol_MAE": 2.8460482437431267e-06, "h_J_mol_max_AE": 0.00017518817367090378, "s_J_mol_K_MAE": 8.176299699574549e-09, "s_J_mol_K_max_AE": 4.7442193107372077e-07}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 0.00011304036148856653, "v_max_APE_percent": 0.009908735799268875, "fugacity_MAPE_percent": 2.46445659357478e-05, "fugacity_max_APE_percent": 0.0018560669905021143, "h_J_mol_MAE": 0.004875939746835645, "h_J_mol_max_AE": 0.6570068072464892, "s_J_mol_K_MAE": 1.4279543863011555e-05, "s_J_mol_K_max_AE": 0.0017879685603716666}, {"points": 4096, "v_MAPE_percent": 6.75895881897641e-06, "v_max_APE_percent": 0.0008657426499691923, "fugacity_MAPE_percent": 1.3829571421852468e-06, "fugacity_max_APE_percent": 0.0001087625168150197, "h_J_mol_MAE": 0.00027504244325138316, "h_J_mol_max_AE": 0.04197859588884967, "s_J_mol_K_MAE": 7.977014328077511e-07, "s_J_mol_K_max_AE": 0.00012308930937621199}, {"points": 16384, "v_MAPE_percent": 5.944294069124001e-07, "v_max_APE_percent": 0.00014242829280419755, "fugacity_MAPE_percent": 1.1564429611404109e-07, "fugacity_max_APE_percent": 2.1239524383709352e-05, "h_J_mol_MAE": 2.6337088269823283e-05, "h_J_mol_max_AE": 0.007313122332107014, "s_J_mol_K_MAE": 7.412234311011609e-08, "s_J_mol_K_max_AE": 2.128117961319731e-05}, {"points": 65536, "v_MAPE_percent": 1.998267200580689e-08, "v_max_APE_percent": 3.996831265951073e-06, "fugacity_MAPE_percent": 5.162722181185908e-09, "fugacity_max_APE_percent": 6.213672021360139e-07, "h_J_mol_MAE": 1.0175722509053742e-06, "h_J_mol_max_AE": 0.00021138657893970958, "s_J_mol_K_MAE": 2.240598978922592e-09, "s_J_mol_K_max_AE": 6.04787544489227e-07}]}, "Propane": {"validation": {"v_MAPE_percent": 2.4239039681656083e-08, "v_max_APE_percent": 6.756096393445432e-06, "fugacity_MAPE_percent": 6.478838971389622e-09, "fugacity_max_APE_percent": 1.1769763164082292e-06, "h_J_mol_MAE": 1.740103456882025e-06, "h_J_mol_max_AE": 0.00044279648864176124, "s_J_mol_K_MAE": 3.64798752316986e-09, "s_J_mol_K_max_AE": 1.0690377614253066e-06}, "test": {"v_MAPE_percent": 1.849698718302782e-08, "v_max_APE_percent": 5.628119703615653e-06, "fugacity_MAPE_percent": 4.6454749552324315e-09, "fugacity_max_APE_percent": 4.770788430974449e-07, "h_J_mol_MAE": 1.094958248071265e-06, "h_J_mol_max_AE": 0.00023486175086873118, "s_J_mol_K_MAE": 2.2349708997566886e-09, "s_J_mol_K_max_AE": 6.212212451117693e-07}, "boundary": {"v_MAPE_percent": 4.6625594270904847e-08, "v_max_APE_percent": 8.529541628554682e-07, "fugacity_MAPE_percent": 1.0859801859858242e-08, "fugacity_max_APE_percent": 1.533877358461666e-07, "h_J_mol_MAE": 2.8029990097877544e-06, "h_J_mol_max_AE": 6.819641203037463e-05, "s_J_mol_K_MAE": 6.868875804949548e-09, "s_J_mol_K_max_AE": 1.6175014572183954e-07}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 7.519926226594222e-05, "v_max_APE_percent": 0.004676680903092922, "fugacity_MAPE_percent": 1.3794538840155787e-05, "fugacity_max_APE_percent": 0.0004697163762612533, "h_J_mol_MAE": 0.0035374998946657854, "h_J_mol_max_AE": 0.17590325364835735, "s_J_mol_K_MAE": 8.422548930676205e-06, "s_J_mol_K_max_AE": 0.0005017233455255621}, {"points": 4096, "v_MAPE_percent": 3.1551178423811638e-06, "v_max_APE_percent": 0.00018979957683296078, "fugacity_MAPE_percent": 7.267141466718585e-07, "fugacity_max_APE_percent": 3.111403525934975e-05, "h_J_mol_MAE": 0.00016724133817191955, "h_J_mol_max_AE": 0.010980581777403131, "s_J_mol_K_MAE": 3.512669271808766e-07, "s_J_mol_K_max_AE": 2.6727218454425383e-05}, {"points": 16384, "v_MAPE_percent": 2.2024093534155076e-07, "v_max_APE_percent": 3.6669074243711464e-05, "fugacity_MAPE_percent": 5.992465243638556e-08, "fugacity_max_APE_percent": 5.899817900889559e-06, "h_J_mol_MAE": 1.487503864439077e-05, "h_J_mol_max_AE": 0.002268407208248391, "s_J_mol_K_MAE": 2.8517724624463336e-08, "s_J_mol_K_max_AE": 5.564246972511455e-06}, {"points": 65536, "v_MAPE_percent": 2.4239039681656083e-08, "v_max_APE_percent": 6.756096393445432e-06, "fugacity_MAPE_percent": 6.478838971389622e-09, "fugacity_max_APE_percent": 1.1769763164082292e-06, "h_J_mol_MAE": 1.740103456882025e-06, "h_J_mol_max_AE": 0.00044279648864176124, "s_J_mol_K_MAE": 3.64798752316986e-09, "s_J_mol_K_max_AE": 1.0690377614253066e-06}]}, "n-Butane": {"validation": {"v_MAPE_percent": 2.595405528948297e-08, "v_max_APE_percent": 2.831802103919756e-06, "fugacity_MAPE_percent": 5.881877428691451e-09, "fugacity_max_APE_percent": 9.584182336652702e-08, "h_J_mol_MAE": 1.7909645997349344e-06, "h_J_mol_max_AE": 3.811463466263376e-05, "s_J_mol_K_MAE": 3.2684545903105544e-09, "s_J_mol_K_max_AE": 9.633640019046652e-08}, "test": {"v_MAPE_percent": 4.0777020724868523e-08, "v_max_APE_percent": 9.479436169357314e-06, "fugacity_MAPE_percent": 6.993802488097084e-09, "fugacity_max_APE_percent": 3.414060589790324e-07, "h_J_mol_MAE": 2.1577131112948678e-06, "h_J_mol_max_AE": 0.0002655954012880102, "s_J_mol_K_MAE": 3.893503507448881e-09, "s_J_mol_K_max_AE": 5.775437035282494e-07}, "boundary": {"v_MAPE_percent": 8.275852373187953e-08, "v_max_APE_percent": 1.0365001634760063e-05, "fugacity_MAPE_percent": 1.1225416733304239e-08, "fugacity_max_APE_percent": 1.498486867923532e-06, "h_J_mol_MAE": 3.7953096665432895e-06, "h_J_mol_max_AE": 0.00040967122731672134, "s_J_mol_K_MAE": 7.685371679333475e-09, "s_J_mol_K_max_AE": 8.241706730416354e-07}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 0.00012083922288237941, "v_max_APE_percent": 0.008451013402255292, "fugacity_MAPE_percent": 1.5647378516568493e-05, "fugacity_max_APE_percent": 0.0005295115441672493, "h_J_mol_MAE": 0.00576374256246126, "h_J_mol_max_AE": 0.20580305224575568, "s_J_mol_K_MAE": 1.0120037086704115e-05, "s_J_mol_K_max_AE": 0.0003855360569176014}, {"points": 4096, "v_MAPE_percent": 7.909364892937434e-06, "v_max_APE_percent": 0.0008324490170297238, "fugacity_MAPE_percent": 9.409171242927977e-07, "fugacity_max_APE_percent": 2.6146923159942048e-05, "h_J_mol_MAE": 0.0003265620886701015, "h_J_mol_max_AE": 0.012909627806948265, "s_J_mol_K_MAE": 6.122312190548485e-07, "s_J_mol_K_max_AE": 3.412925923385046e-05}, {"points": 16384, "v_MAPE_percent": 5.055360533618922e-07, "v_max_APE_percent": 6.88909265633697e-05, "fugacity_MAPE_percent": 7.367666448720306e-08, "fugacity_max_APE_percent": 3.3857071146670137e-06, "h_J_mol_MAE": 2.76971607604537e-05, "h_J_mol_max_AE": 0.0010521661224629497, "s_J_mol_K_MAE": 5.215506926337099e-08, "s_J_mol_K_max_AE": 2.5393918576810393e-06}, {"points": 65536, "v_MAPE_percent": 2.595405528948297e-08, "v_max_APE_percent": 2.831802103919756e-06, "fugacity_MAPE_percent": 5.881877428691451e-09, "fugacity_max_APE_percent": 9.584182336652702e-08, "h_J_mol_MAE": 1.7909645997349344e-06, "h_J_mol_max_AE": 3.811463466263376e-05, "s_J_mol_K_MAE": 3.2684545903105544e-09, "s_J_mol_K_max_AE": 9.633640019046652e-08}]}, "CarbonMonoxide": {"validation": {"v_MAPE_percent": 2.0690582060167717e-09, "v_max_APE_percent": 1.4742447262960923e-07, "fugacity_MAPE_percent": 1.7114038918658592e-09, "fugacity_max_APE_percent": 1.1266283461708326e-07, "h_J_mol_MAE": 5.562423617544443e-08, "h_J_mol_max_AE": 3.1060569085639145e-06, "s_J_mol_K_MAE": 2.50236574828879e-10, "s_J_mol_K_max_AE": 1.0043339493392978e-08}, "test": {"v_MAPE_percent": 1.3730941839269761e-09, "v_max_APE_percent": 2.8121565076588695e-07, "fugacity_MAPE_percent": 1.1101622279883344e-09, "fugacity_max_APE_percent": 1.7181158717960443e-07, "h_J_mol_MAE": 4.2976145003814636e-08, "h_J_mol_max_AE": 2.7718675426058326e-06, "s_J_mol_K_MAE": 1.7806949460665402e-10, "s_J_mol_K_max_AE": 8.165862430686843e-09}, "boundary": {"v_MAPE_percent": 2.065406873308362e-09, "v_max_APE_percent": 1.9767487646760173e-07, "fugacity_MAPE_percent": 1.537294857384408e-09, "fugacity_max_APE_percent": 1.047829045752735e-07, "h_J_mol_MAE": 1.362758420275778e-07, "h_J_mol_max_AE": 1.950803311956406e-05, "s_J_mol_K_MAE": 4.19670759081725e-10, "s_J_mol_K_max_AE": 6.145464936935241e-08}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 5.405028307629671e-06, "v_max_APE_percent": 0.00017674158965252929, "fugacity_MAPE_percent": 4.407834079114478e-06, "fugacity_max_APE_percent": 0.00011453277737327738, "h_J_mol_MAE": 0.00011303497519281336, "h_J_mol_max_AE": 0.00836458845009247, "s_J_mol_K_MAE": 4.7610737645036917e-07, "s_J_mol_K_max_AE": 1.4005963723917603e-05}, {"points": 4096, "v_MAPE_percent": 3.827122100567154e-07, "v_max_APE_percent": 1.7778477912067103e-05, "fugacity_MAPE_percent": 3.115487549150073e-07, "fugacity_max_APE_percent": 1.1745966399523411e-05, "h_J_mol_MAE": 7.0552519326055885e-06, "h_J_mol_max_AE": 0.0004291974173042945, "s_J_mol_K_MAE": 3.235491968904558e-08, "s_J_mol_K_max_AE": 7.647066233573696e-07}, {"points": 16384, "v_MAPE_percent": 2.4698505111768465e-08, "v_max_APE_percent": 2.0603726280654655e-06, "fugacity_MAPE_percent": 2.0440131553479957e-08, "fugacity_max_APE_percent": 1.329074317268919e-06, "h_J_mol_MAE": 5.337700232505016e-07, "h_J_mol_max_AE": 4.644888230131983e-05, "s_J_mol_K_MAE": 2.509847182800948e-09, "s_J_mol_K_max_AE": 9.120417310271023e-08}, {"points": 65536, "v_MAPE_percent": 2.0690582060167717e-09, "v_max_APE_percent": 1.4742447262960923e-07, "fugacity_MAPE_percent": 1.7114038918658592e-09, "fugacity_max_APE_percent": 1.1266283461708326e-07, "h_J_mol_MAE": 5.562423617544443e-08, "h_J_mol_max_AE": 3.1060569085639145e-06, "s_J_mol_K_MAE": 2.50236574828879e-10, "s_J_mol_K_max_AE": 1.0043339493392978e-08}]}, "Ammonia": {"validation": {"v_MAPE_percent": 3.651022409748017e-09, "v_max_APE_percent": 3.0866558198283656e-07, "fugacity_MAPE_percent": 3.189442351718419e-09, "fugacity_max_APE_percent": 2.0515281695665522e-07, "h_J_mol_MAE": 6.981274243145208e-07, "h_J_mol_max_AE": 6.367272908391897e-05, "s_J_mol_K_MAE": 9.764159092807284e-10, "s_J_mol_K_max_AE": 8.85302711139957e-08}, "test": {"v_MAPE_percent": 2.2655093512985447e-09, "v_max_APE_percent": 2.1401060923409432e-07, "fugacity_MAPE_percent": 2.092664241762701e-09, "fugacity_max_APE_percent": 1.8697117187826962e-07, "h_J_mol_MAE": 4.526855041930844e-07, "h_J_mol_max_AE": 5.732239606004441e-05, "s_J_mol_K_MAE": 6.382201384676385e-10, "s_J_mol_K_max_AE": 7.712755589750486e-08}, "boundary": {"v_MAPE_percent": 5.897594131804018e-09, "v_max_APE_percent": 5.113446999160942e-07, "fugacity_MAPE_percent": 3.237643356537867e-09, "fugacity_max_APE_percent": 2.5036139827960824e-07, "h_J_mol_MAE": 4.683484799983262e-07, "h_J_mol_max_AE": 4.7010876187414397e-05, "s_J_mol_K_MAE": 8.942238481808584e-10, "s_J_mol_K_max_AE": 9.102113551762159e-08}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 6.601842791149545e-06, "v_max_APE_percent": 0.0007157190271334102, "fugacity_MAPE_percent": 4.93279395349152e-06, "fugacity_max_APE_percent": 0.0003503154090589433, "h_J_mol_MAE": 0.0012113654649645866, "h_J_mol_max_AE": 0.06255905683246965, "s_J_mol_K_MAE": 1.6491259461381188e-06, "s_J_mol_K_max_AE": 0.00011657172123236137}, {"points": 4096, "v_MAPE_percent": 5.382872452245821e-07, "v_max_APE_percent": 4.567349549677857e-05, "fugacity_MAPE_percent": 4.3401759079048086e-07, "fugacity_max_APE_percent": 2.1891429247133942e-05, "h_J_mol_MAE": 0.00010310231787258317, "h_J_mol_max_AE": 0.0035517428559614928, "s_J_mol_K_MAE": 1.436079637045281e-07, "s_J_mol_K_max_AE": 7.00127419150931e-06}, {"points": 16384, "v_MAPE_percent": 4.871774103923365e-08, "v_max_APE_percent": 5.407554004577264e-06, "fugacity_MAPE_percent": 4.070475037760979e-08, "fugacity_max_APE_percent": 2.7959112358644234e-06, "h_J_mol_MAE": 9.365263204941243e-06, "h_J_mol_max_AE": 0.0005620775946226786, "s_J_mol_K_MAE": 1.3143830414471744e-08, "s_J_mol_K_max_AE": 7.579004375202203e-07}, {"points": 65536, "v_MAPE_percent": 3.651022409748017e-09, "v_max_APE_percent": 3.0866558198283656e-07, "fugacity_MAPE_percent": 3.189442351718419e-09, "fugacity_max_APE_percent": 2.0515281695665522e-07, "h_J_mol_MAE": 6.981274243145208e-07, "h_J_mol_max_AE": 6.367272908391897e-05, "s_J_mol_K_MAE": 9.764159092807284e-10, "s_J_mol_K_max_AE": 8.85302711139957e-08}]}, "SulfurDioxide": {"validation": {"v_MAPE_percent": 7.46710610011192e-09, "v_max_APE_percent": 5.345147990887256e-07, "fugacity_MAPE_percent": 4.1970559623225046e-09, "fugacity_max_APE_percent": 3.268110670973101e-07, "h_J_mol_MAE": 1.0024337697700503e-06, "h_J_mol_max_AE": 8.666388293931959e-05, "s_J_mol_K_MAE": 1.6739196962139297e-09, "s_J_mol_K_max_AE": 1.4003994230904482e-07}, "test": {"v_MAPE_percent": 1.073634044081867e-08, "v_max_APE_percent": 1.9755857949554922e-06, "fugacity_MAPE_percent": 5.744237144321776e-09, "fugacity_max_APE_percent": 7.466704365910459e-07, "h_J_mol_MAE": 1.4256915803478876e-06, "h_J_mol_max_AE": 0.00022703900231135776, "s_J_mol_K_MAE": 2.401988892942325e-09, "s_J_mol_K_max_AE": 4.1174125087195534e-07}, "boundary": {"v_MAPE_percent": 1.0912685512176612e-08, "v_max_APE_percent": 4.2857334348056497e-07, "fugacity_MAPE_percent": 5.336888136281415e-09, "fugacity_max_APE_percent": 1.6161636473555063e-07, "h_J_mol_MAE": 1.3871888313587988e-06, "h_J_mol_max_AE": 4.740247277368326e-05, "s_J_mol_K_MAE": 2.383478571194725e-09, "s_J_mol_K_max_AE": 8.63864428879424e-08}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 3.849170254642195e-05, "v_max_APE_percent": 0.001717343197882304, "fugacity_MAPE_percent": 1.9544124672831766e-05, "fugacity_max_APE_percent": 0.0006781005142952878, "h_J_mol_MAE": 0.005143461296388097, "h_J_mol_max_AE": 0.19930859737178253, "s_J_mol_K_MAE": 8.706670518459367e-06, "s_J_mol_K_max_AE": 0.0003588420760340938}, {"points": 4096, "v_MAPE_percent": 2.2568083674848888e-06, "v_max_APE_percent": 0.00014630225778633488, "fugacity_MAPE_percent": 1.1424815886526205e-06, "fugacity_max_APE_percent": 5.7710649714604045e-05, "h_J_mol_MAE": 0.0002991121231481486, "h_J_mol_max_AE": 0.017497287586593302, "s_J_mol_K_MAE": 5.073462642222245e-07, "s_J_mol_K_max_AE": 3.136234367673296e-05}, {"points": 16384, "v_MAPE_percent": 1.2190029170539712e-07, "v_max_APE_percent": 7.864965934079038e-06, "fugacity_MAPE_percent": 6.401571683769397e-08, "fugacity_max_APE_percent": 4.800016262240803e-06, "h_J_mol_MAE": 1.6441227227659283e-05, "h_J_mol_max_AE": 0.001280932188819861, "s_J_mol_K_MAE": 2.770055830265787e-08, "s_J_mol_K_max_AE": 2.071360455602189e-06}, {"points": 65536, "v_MAPE_percent": 7.46710610011192e-09, "v_max_APE_percent": 5.345147990887256e-07, "fugacity_MAPE_percent": 4.1970559623225046e-09, "fugacity_max_APE_percent": 3.268110670973101e-07, "h_J_mol_MAE": 1.0024337697700503e-06, "h_J_mol_max_AE": 8.666388293931959e-05, "s_J_mol_K_MAE": 1.6739196962139297e-09, "s_J_mol_K_max_AE": 1.4003994230904482e-07}]}, "Water": {"validation": {"v_MAPE_percent": 7.796359044465184e-10, "v_max_APE_percent": 2.2754187423146277e-08, "fugacity_MAPE_percent": 7.571331799363645e-10, "fugacity_max_APE_percent": 2.4054613856350215e-08, "h_J_mol_MAE": 3.7684228715306745e-07, "h_J_mol_max_AE": 2.7384012355469167e-05, "s_J_mol_K_MAE": 3.6360795927989353e-10, "s_J_mol_K_max_AE": 2.742608273820224e-08}, "test": {"v_MAPE_percent": 9.957672924068572e-10, "v_max_APE_percent": 8.604781331911227e-08, "fugacity_MAPE_percent": 9.531174894467087e-10, "fugacity_max_APE_percent": 7.322799033815386e-08, "h_J_mol_MAE": 4.528246630997046e-07, "h_J_mol_max_AE": 2.9902859751018696e-05, "s_J_mol_K_MAE": 4.370305190328806e-10, "s_J_mol_K_max_AE": 2.845999347300676e-08}, "boundary": {"v_MAPE_percent": 1.4704854087860264e-09, "v_max_APE_percent": 3.335816067817632e-08, "fugacity_MAPE_percent": 1.137228505809773e-09, "fugacity_max_APE_percent": 2.355132755482714e-08, "h_J_mol_MAE": 2.9178512761518505e-07, "h_J_mol_max_AE": 6.5395615820307285e-06, "s_J_mol_K_MAE": 2.808750003413518e-10, "s_J_mol_K_max_AE": 6.5330425513820956e-09}, "learning_curve": [{"points": 1024, "v_MAPE_percent": 1.5032840303521103e-06, "v_max_APE_percent": 5.6763818356841966e-05, "fugacity_MAPE_percent": 1.5269259050513725e-06, "fugacity_max_APE_percent": 4.023076451975527e-05, "h_J_mol_MAE": 0.0007275075406241172, "h_J_mol_max_AE": 0.018795326021063374, "s_J_mol_K_MAE": 6.301266696419512e-07, "s_J_mol_K_max_AE": 1.402583735821139e-05}, {"points": 4096, "v_MAPE_percent": 1.232089723215285e-07, "v_max_APE_percent": 5.193515240087265e-06, "fugacity_MAPE_percent": 1.190773820476318e-07, "fugacity_max_APE_percent": 3.7420121334896805e-06, "h_J_mol_MAE": 5.0998612785235764e-05, "h_J_mol_max_AE": 0.0018984513044415507, "s_J_mol_K_MAE": 4.611258894041473e-08, "s_J_mol_K_max_AE": 1.4441782454355234e-06}, {"points": 16384, "v_MAPE_percent": 8.546134459830323e-09, "v_max_APE_percent": 3.17278803230181e-07, "fugacity_MAPE_percent": 8.453015782998452e-09, "fugacity_max_APE_percent": 3.113289626099913e-07, "h_J_mol_MAE": 3.834559642257318e-06, "h_J_mol_max_AE": 0.000210572914511431, "s_J_mol_K_MAE": 3.5710769241865947e-09, "s_J_mol_K_max_AE": 1.5944716480476018e-07}, {"points": 65536, "v_MAPE_percent": 7.796359044465184e-10, "v_max_APE_percent": 2.2754187423146277e-08, "fugacity_MAPE_percent": 7.571331799363645e-10, "fugacity_max_APE_percent": 2.4054613856350215e-08, "h_J_mol_MAE": 3.7684228715306745e-07, "h_J_mol_max_AE": 2.7384012355469167e-05, "s_J_mol_K_MAE": 3.6360795927989353e-10, "s_J_mol_K_max_AE": 2.742608273820224e-08}]}};
+    const R = 8.31446261815324;
+    const T_REF = 300.0;
+    const P_REF = 100000.0;
+    const SQRT2 = Math.SQRT2;
+
+    const FIELDS = [
+      ["Z", "Compressibility factor, Z", "—", 1],
+      ["v_m3_mol", "Molar volume", "L/mol", 1000],
+      ["V_m3", "Total volume", "L", 1000],
+      ["rho_kg_m3", "Density", "kg/m³", 1],
+      ["h_J_mol", "Molar enthalpy", "kJ/mol", 0.001],
+      ["s_J_mol_K", "Molar entropy", "J/(mol·K)", 1],
+      ["H_J", "Total enthalpy", "kJ", 0.001],
+      ["S_J_K", "Total entropy", "J/K", 1],
+      ["phi", "Fugacity coefficient, φ", "—", 1],
+      ["fugacity_Pa", "Fugacity", "bar", 0.00001]
+    ];
+
+    // Analytical PR76 cubic solver (Cardano / trigonometric gas branch root Z > B)
+    function solveCubicZ(A, B) {
+      const c2 = B - 1.0;
+      const c1 = A - 3.0 * B * B - 2.0 * B;
+      const c0 = -A * B + B * B + B * B * B;
+      const p = c1 - (c2 * c2) / 3.0;
+      const q = (2.0 * c2 * c2 * c2) / 27.0 - (c2 * c1) / 3.0 + c0;
+      const disc = (q * q) / 4.0 + (p * p * p) / 27.0;
+      const shift = -c2 / 3.0;
+      let roots = [];
+      if (disc > 1e-18) {
+        const sqrtD = Math.sqrt(disc);
+        const u = Math.cbrt(-q / 2.0 + sqrtD);
+        const v = Math.cbrt(-q / 2.0 - sqrtD);
+        roots.push(u + v + shift);
+      } else if (Math.abs(disc) <= 1e-18) {
+        const u = Math.cbrt(-q / 2.0);
+        roots.push(2.0 * u + shift, -u + shift);
+      } else {
+        const r = Math.sqrt(-p / 3.0);
+        const cosArg = Math.max(-1.0, Math.min(1.0, -q / (2.0 * r * r * r)));
+        const theta = Math.acos(cosArg);
+        roots.push(
+          2.0 * r * Math.cos(theta / 3.0) + shift,
+          2.0 * r * Math.cos((theta + 2.0 * Math.PI) / 3.0) + shift,
+          2.0 * r * Math.cos((theta + 4.0 * Math.PI) / 3.0) + shift
+        );
+      }
+      // Refine largest root > B with 2 Newton-Raphson steps for full IEEE-754 precision
+      const valid = roots.filter(r => r > B);
+      let z = Math.max(...valid);
+      for (let i = 0; i < 2; i++) {
+        const f = ((z + c2) * z + c1) * z + c0;
+        const df = (3.0 * z + 2.0 * c2) * z + c1;
+        if (Math.abs(df) > 1e-15) z -= f / df;
+      }
+      return z;
+    }
+
+    function primitiveNASA(T, coef) {
+      const [a0, a1, a2, a3, a4] = coef;
+      const T2 = T * T, T3 = T2 * T, T4 = T3 * T, T5 = T4 * T;
+      const h = R * (a0 * T + 0.5 * a1 * T2 + (a2 / 3.0) * T3 + 0.25 * a3 * T4 + 0.2 * a4 * T5);
+      const s = R * (a0 * Math.log(T) + a1 * T + 0.5 * a2 * T2 + (a3 / 3.0) * T3 + 0.25 * a4 * T4);
+      return [h, s];
+    }
+
+    function directPR(T, P, gas, n = 1.0) {
+      const info = FLUID_DATA.fluids[gas];
+      const tc = info.Tc_K, pc = info.Pc_Pa, w = info.acentric_factor;
+      const kappa = 0.37464 + 1.54226 * w - 0.26992 * w * w;
+      const root = Math.sqrt(T / tc);
+      const g = 1.0 + kappa * (1.0 - root);
+      const ac = 0.45724 * R * R * tc * tc / pc;
+      const a = ac * g * g;
+      const da = -ac * kappa * g / (tc * root);
+      const b = 0.07780 * R * tc / pc;
+
+      const A = (a * P) / (R * R * T * T);
+      const B = (b * P) / (R * T);
+      const z = solveCubicZ(A, B);
+      const L = Math.log1p((2.0 * SQRT2 * B) / (z + (1.0 - SQRT2) * B));
+      const hres = R * T * (z - 1.0) + ((T * da - a) / (2.0 * SQRT2 * b)) * L;
+      const sres = R * Math.log(z - B) + (da / (2.0 * SQRT2 * b)) * L;
+
+      let hig = 0.0, sig = 0.0;
+      const ranges = info.nasa_temperature_ranges_K;
+      for (let i = 0; i < ranges.length - 1; i++) {
+        const low = ranges[i], high = ranges[i + 1], coef = info.nasa7_coefficients[i];
+        const upper = Math.min(Math.max(T, low), high);
+        const ref = Math.min(Math.max(T_REF, low), high);
+        const [hu, su] = primitiveNASA(upper, coef);
+        const [hr, sr] = primitiveNASA(ref, coef);
+        hig += hu - hr;
+        sig += su - sr;
+      }
+      const h = hig + hres;
+      const s = sig - R * Math.log(P / P_REF) + sres;
+      const ln_phi = z - 1.0 - Math.log(z - B) - (A / (2.0 * SQRT2 * B)) * L;
+      const phi = Math.exp(ln_phi);
+      const v = (z * R * T) / P;
+      return {
+        Z: z, v_m3_mol: v, V_m3: n * v, rho_kg_m3: info.molar_mass_kg_mol / v,
+        h_J_mol: h, s_J_mol_K: s, H_J: n * h, S_J_K: n * s,
+        phi: phi, fugacity_Pa: phi * P,
+        targets: [Math.log(z), h, s, ln_phi]
+      };
+    }
+
+    // Solve M * X = B for 54x54 local quintic RBF + degree-2 polynomial system
+    function solveLinearSystemMulti(M, B) {
+      const n = M.length;
+      const nCols = B[0].length;
+      const A = M.map((row, i) => [...row, ...B[i]]);
+      for (let k = 0; k < n; k++) {
+        let maxRow = k, maxVal = Math.abs(A[k][k]);
+        for (let i = k + 1; i < n; i++) {
+          const v = Math.abs(A[i][k]);
+          if (v > maxVal) { maxVal = v; maxRow = i; }
+        }
+        if (maxRow !== k) { const tmp = A[k]; A[k] = A[maxRow]; A[maxRow] = tmp; }
+        const pivot = A[k][k];
+        for (let i = k + 1; i < n; i++) {
+          const factor = A[i][k] / pivot;
+          for (let j = k; j < n + nCols; j++) A[i][j] -= factor * A[k][j];
+        }
+      }
+      const X = Array.from({ length: n }, () => new Array(nCols).fill(0));
+      for (let i = n - 1; i >= 0; i--) {
+        for (let c = 0; c < nCols; c++) {
+          let sum = A[i][n + c];
+          for (let j = i + 1; j < n; j++) sum -= A[i][j] * X[j][c];
+          X[i][c] = sum / A[i][i];
+        }
+      }
+      return X;
+    }
+
+    // Exact 48-neighbor Local Quintic RBF Surrogate on the 256x256 grid
+    function predictLocalRBF(T, P, gas, n = 1.0) {
+      const info = FLUID_DATA.fluids[gas];
+      const [tmin, tmax] = info.T_range_K;
+      const [pmin, pmax] = info.P_range_Pa;
+      const x1 = (T - tmin) / (tmax - tmin);
+      const x2 = Math.log(P / pmin) / Math.log(pmax / pmin);
+
+      const side = 256;
+      const iCenter = Math.round(x1 * (side - 1));
+      const jCenter = Math.round(x2 * (side - 1));
+      const candidates = [];
+      for (let di = -5; di <= 5; di++) {
+        const ii = iCenter + di;
+        if (ii < 0 || ii >= side) continue;
+        const gx1 = ii / (side - 1);
+        for (let dj = -5; dj <= 5; dj++) {
+          const jj = jCenter + dj;
+          if (jj < 0 || jj >= side) continue;
+          const gx2 = jj / (side - 1);
+          const d2 = (x1 - gx1) * (x1 - gx1) + (x2 - gx2) * (x2 - gx2);
+          candidates.push({ gx1, gx2, d2 });
+        }
+      }
+      candidates.sort((a, b) => a.d2 - b.d2);
+      const k = 48;
+      const nodes = candidates.slice(0, k);
+
+      const M = Array.from({ length: k + 6 }, () => new Array(k + 6).fill(0));
+      const B = Array.from({ length: k + 6 }, () => [0, 0, 0, 0]);
+
+      for (let i = 0; i < k; i++) {
+        const ni = nodes[i];
+        const Ti = tmin + ni.gx1 * (tmax - tmin);
+        const Pi = pmin * Math.pow(pmax / pmin, ni.gx2);
+        B[i] = directPR(Ti, Pi, gas, 1.0).targets;
+        for (let j = i; j < k; j++) {
+          const nj = nodes[j];
+          const r = Math.hypot(ni.gx1 - nj.gx1, ni.gx2 - nj.gx2);
+          const phi = -(r * r * r * r * r);
+          M[i][j] = phi;
+          M[j][i] = phi;
+        }
+        const poly = [1.0, ni.gx1, ni.gx2, ni.gx1 * ni.gx1, ni.gx1 * ni.gx2, ni.gx2 * ni.gx2];
+        for (let p = 0; p < 6; p++) {
+          M[i][k + p] = poly[p];
+          M[k + p][i] = poly[p];
+        }
+      }
+
+      const weights = solveLinearSystemMulti(M, B);
+      const pred = [0, 0, 0, 0];
+      for (let i = 0; i < k; i++) {
+        const r = Math.sqrt(nodes[i].d2);
+        const phi = -(r * r * r * r * r);
+        for (let c = 0; c < 4; c++) pred[c] += weights[i][c] * phi;
+      }
+      const qPoly = [1.0, x1, x2, x1 * x1, x1 * x2, x2 * x2];
+      for (let p = 0; p < 6; p++) {
+        for (let c = 0; c < 4; c++) pred[c] += weights[k + p][c] * qPoly[p];
+      }
+
+      const z = Math.exp(pred[0]);
+      const v = (z * R * T) / P;
+      const phiVal = Math.exp(pred[3]);
+      return {
+        Z: z, v_m3_mol: v, V_m3: n * v, rho_kg_m3: info.molar_mass_kg_mol / v,
+        h_J_mol: pred[1], s_J_mol_K: pred[2], H_J: n * pred[1], S_J_K: n * pred[2],
+        phi: phiVal, fugacity_Pa: phiVal * P
+      };
+    }
+
+    // Brent's method to invert molar volume v [m³/mol] to P [Pa]
+    function invertPressure(T, vTarget, gas) {
+      const info = FLUID_DATA.fluids[gas];
+      let [a, b] = info.P_range_Pa;
+      let fa = predictLocalRBF(T, a, gas, 1.0).v_m3_mol - vTarget;
+      let fb = predictLocalRBF(T, b, gas, 1.0).v_m3_mol - vTarget;
+      if (fa * fb > 0) return null;
+      for (let iter = 0; iter < 50; iter++) {
+        const mid = 0.5 * (a + b);
+        const fmid = predictLocalRBF(T, mid, gas, 1.0).v_m3_mol - vTarget;
+        if (Math.abs(fmid) < 1e-13 || (b - a) / mid < 1e-11) return mid;
+        if (fa * fmid <= 0) { b = mid; fb = fmid; }
+        else { a = mid; fa = fmid; }
+      }
+      return 0.5 * (a + b);
+    }
+
+    // UI wiring
+    const gasSelect = document.getElementById("gasSelect");
+    const tempUnit = document.getElementById("tempUnit");
+    const tempInput = document.getElementById("tempInput");
+    const amountInput = document.getElementById("amountInput");
+    const pUnit = document.getElementById("pUnit");
+    const pressureInput = document.getElementById("pressureInput");
+    const volumeInput = document.getElementById("volumeInput");
+    const plotPropSelect = document.getElementById("plotPropSelect");
+    const compareCheck = document.getElementById("compareCheck");
+
+    Object.keys(FLUID_DATA.fluids).forEach(g => {
+      const opt = document.createElement("option");
+      opt.value = g; opt.textContent = g;
+      if (g === "CarbonDioxide") opt.selected = true;
+      gasSelect.appendChild(opt);
+    });
+
+    FIELDS.forEach(([key, label]) => {
+      const opt = document.createElement("option");
+      opt.value = key; opt.textContent = label;
+      plotPropSelect.appendChild(opt);
+    });
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(btn.dataset.tab).classList.add("active");
+        updateApp();
+      });
+    });
+
+    function fmtNum(val) {
+      if (val === 0) return "0";
+      const a = Math.abs(val);
+      if (a >= 1e-3 && a < 1e6) return Number(val.toPrecision(8)).toString();
+      return val.toExponential(4);
+    }
+
+    let lastPropsCSV = "";
+    let lastCurveCSV = "";
+
+    function updateBoundsOnGasOrUnitChange(resetValues = false) {
+      const gas = gasSelect.value;
+      const info = FLUID_DATA.fluids[gas];
+      const offset = tempUnit.value === "C" ? 273.15 : 0.0;
+      const [tmin, tmax] = info.T_range_K;
+      document.getElementById("tempLabel").textContent = `Temperature (${tempUnit.value === "C" ? "°C" : "K"})`;
+      document.getElementById("tempRangeCaption").textContent = `Valid range: ${(tmin - offset).toFixed(2)}–${(tmax - offset).toFixed(2)} ${tempUnit.value === "C" ? "°C" : "K"}`;
+      if (resetValues) {
+        const tDef = Math.min(Math.max(400.0, tmin), tmax);
+        tempInput.value = (tDef - offset).toFixed(2);
+      }
+
+      const pFactor = { bar: 1e5, kPa: 1e3, MPa: 1e6, Pa: 1 }[pUnit.value];
+      const [pmin, pmax] = info.P_range_Pa;
+      document.getElementById("pressureLabel").textContent = `Pressure (${pUnit.value})`;
+      document.getElementById("pressureRangeCaption").textContent = `Valid range: ${(pmin / pFactor).toFixed(2)}–${(pmax / pFactor).toFixed(2)} ${pUnit.value}`;
+      if (resetValues) {
+        pressureInput.value = (2e6 / pFactor).toString();
+      }
+    }
+
+    function drawChart(pressuresBar, mlVals, prVals, yLabel) {
+      const canvas = document.getElementById("trendCanvas");
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+      const padL = 78, padR = 26, padT = 24, padB = 46;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+
+      const allY = [...mlVals, ...prVals];
+      let yMin = Math.min(...allY), yMax = Math.max(...allY);
+      if (yMax === yMin) { yMin -= 1; yMax += 1; }
+      const yPad = 0.06 * (yMax - yMin);
+      yMin -= yPad; yMax += yPad;
+
+      const xToPx = x => padL + ((x - 1.0) / 49.0) * plotW;
+      const yToPx = y => padT + (1.0 - (y - yMin) / (yMax - yMin)) * plotH;
+
+      // Grid lines
+      ctx.strokeStyle = "#e8eff0";
+      ctx.lineWidth = 1;
+      ctx.fillStyle = "#5a7178";
+      ctx.font = "12px -apple-system, sans-serif";
+      for (let i = 0; i <= 5; i++) {
+        const yVal = yMin + (i / 5) * (yMax - yMin);
+        const py = yToPx(yVal);
+        ctx.beginPath(); ctx.moveTo(padL, py); ctx.lineTo(W - padR, py); ctx.stroke();
+        ctx.textAlign = "right";
+        ctx.fillText(Number(yVal.toPrecision(4)).toString(), padL - 8, py + 4);
+      }
+      for (const xTick of [1, 10, 20, 30, 40, 50]) {
+        const px = xToPx(xTick);
+        ctx.beginPath(); ctx.moveTo(px, padT); ctx.lineTo(px, H - padB); ctx.stroke();
+        ctx.textAlign = "center";
+        ctx.fillText(xTick.toString(), px, H - padB + 18);
+      }
+      ctx.fillText("Pressure (bar)", padL + plotW / 2, H - 10);
+
+      // ML line
+      ctx.strokeStyle = "#087f8c";
+      ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      pressuresBar.forEach((p, idx) => {
+        const px = xToPx(p), py = yToPx(mlVals[idx]);
+        if (idx === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+
+      // Direct PR dashed line
+      ctx.strokeStyle = "#e6a23c";
+      ctx.lineWidth = 2.0;
+      ctx.setLineDash([6, 5]);
+      ctx.beginPath();
+      pressuresBar.forEach((p, idx) => {
+        const px = xToPx(p), py = yToPx(prVals[idx]);
+        if (idx === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      });
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    function updateApp() {
+      const gas = gasSelect.value;
+      const info = FLUID_DATA.fluids[gas];
+      const [tmin, tmax] = info.T_range_K;
+      const [pmin, pmax] = info.P_range_Pa;
+      const offset = tempUnit.value === "C" ? 273.15 : 0.0;
+      let T = parseFloat(tempInput.value) + offset;
+      if (!Number.isFinite(T)) T = tmin;
+      T = Math.min(Math.max(T, tmin), tmax);
+
+      let n = parseFloat(amountInput.value);
+      if (!Number.isFinite(n) || n <= 0) n = 1.0;
+
+      const mode = document.querySelector('input[name="calcMode"]:checked').value;
+      document.getElementById("pressureControls").style.display = mode === "tp" ? "block" : "none";
+      document.getElementById("volumeControls").style.display = mode === "tv" ? "block" : "none";
+
+      const vmin = predictLocalRBF(T, pmax, gas, 1.0).v_m3_mol * 1000;
+      const vmax = predictLocalRBF(T, pmin, gas, 1.0).v_m3_mol * 1000;
+      document.getElementById("volumeRangeCaption").textContent = `Valid at ${T.toFixed(2)} K: ${vmin.toPrecision(5)}–${vmax.toPrecision(5)} L/mol`;
+
+      const errBox = document.getElementById("errorBox");
+      const resContent = document.getElementById("resultsContent");
+      let P;
+      if (mode === "tp") {
+        const pFactor = { bar: 1e5, kPa: 1e3, MPa: 1e6, Pa: 1 }[pUnit.value];
+        const pRaw = parseFloat(pressureInput.value) * pFactor;
+        P = Math.min(Math.max(Number.isFinite(pRaw) ? pRaw : 2e6, pmin), pmax);
+        errBox.style.display = "none";
+        resContent.style.display = "block";
+      } else {
+        const vL = parseFloat(volumeInput.value);
+        const pRec = invertPressure(T, vL / 1000.0, gas);
+        if (pRec === null) {
+          errBox.textContent = `Molar volume ${vL} L/mol is outside the invertible pressure range [1, 50] bar at ${T.toFixed(2)} K (${vmin.toPrecision(5)}–${vmax.toPrecision(5)} L/mol).`;
+          errBox.style.display = "block";
+          resContent.style.display = "none";
+          return;
+        }
+        P = pRec;
+        errBox.style.display = "none";
+        resContent.style.display = "block";
+      }
+
+      const ml = predictLocalRBF(T, P, gas, n);
+      const pr = directPR(T, P, gas, n);
+
+      document.getElementById("stateHeader").textContent = `${gas} · ${T.toFixed(2)} K · ${(P / 1e5).toFixed(4)} bar`;
+      document.getElementById("stateSubheader").textContent = `${n} mol · Local quintic RBF prediction vs. analytical Peng–Robinson (PR76)`;
+      document.getElementById("metricZ").textContent = ml.Z.toFixed(6);
+      document.getElementById("metricV").textContent = Number((ml.v_m3_mol * 1000).toPrecision(6)).toString();
+      document.getElementById("metricF").textContent = Number((ml.fugacity_Pa / 1e5).toPrecision(6)).toString();
+      document.getElementById("metricRho").textContent = Number(ml.rho_kg_m3.toPrecision(6)).toString();
+
+      // Table
+      const compare = compareCheck.checked;
+      const head = document.getElementById("propTableHead");
+      head.innerHTML = `<th>Property</th><th>Unit</th><th class="num">ML prediction</th>` +
+        (compare ? `<th class="num">Direct PR</th><th class="num">Absolute difference</th>` : "");
+      const body = document.getElementById("propTableBody");
+      body.innerHTML = "";
+      let csvLines = ["gas,T_K,P_Pa,n_mol,Property,Unit,ML_prediction,Direct_PR,Absolute_difference"];
+      FIELDS.forEach(([key, label, unit, scale]) => {
+        const mVal = ml[key] * scale;
+        const pVal = pr[key] * scale;
+        const diff = Math.abs(mVal - pVal);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${label}</td><td>${unit}</td><td class="num">${fmtNum(mVal)}</td>` +
+          (compare ? `<td class="num">${fmtNum(pVal)}</td><td class="num">${fmtNum(diff)}</td>` : "");
+        body.appendChild(tr);
+        csvLines.push(`${gas},${T},${P},${n},"${label}","${unit}",${mVal},${pVal},${diff}`);
+      });
+      lastPropsCSV = csvLines.join("\n");
+
+      // Plot if visible
+      const propKey = plotPropSelect.value;
+      const [, propLabel, propUnit, propScale] = FIELDS.find(f => f[0] === propKey);
+      document.getElementById("plotCaption").textContent = `${propLabel} (${propUnit}) across 1–50 bar at ${T.toFixed(2)} K and ${n} mol`;
+      const pressuresBar = [];
+      const mlCurve = [];
+      const prCurve = [];
+      let curveCSV = ["gas,T_K,n_mol,Pressure_bar,ML_prediction,Direct_PR"];
+      for (let i = 0; i < 80; i++) {
+        const pVal = pmin * Math.pow(pmax / pmin, i / 79);
+        const mC = predictLocalRBF(T, pVal, gas, n)[propKey] * propScale;
+        const pC = directPR(T, pVal, gas, n)[propKey] * propScale;
+        pressuresBar.push(pVal / 1e5);
+        mlCurve.push(mC);
+        prCurve.push(pC);
+        curveCSV.push(`${gas},${T},${n},${pVal / 1e5},${mC},${pC}`);
+      }
+      lastCurveCSV = curveCSV.join("\n");
+      drawChart(pressuresBar, mlCurve, prCurve, `${propLabel} (${propUnit})`);
+
+      // Benchmarks table
+      const mInfo = METRICS_DATA[gas];
+      const bBody = document.getElementById("benchSplitBody");
+      bBody.innerHTML = "";
+      if (mInfo) {
+        [["Validation (N=512)", "validation"], ["Held-Out Interior Test (N=2,048)", "test"], ["Domain Boundary Test (N=256)", "boundary"]].forEach(([title, sp]) => {
+          const s = mInfo[sp];
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td><strong>${title}</strong></td>` +
+            `<td class="num">${s.v_MAPE_percent.toExponential(2)}</td>` +
+            `<td class="num">${s.v_max_APE_percent.toExponential(2)}</td>` +
+            `<td class="num">${s.fugacity_MAPE_percent.toExponential(2)}</td>` +
+            `<td class="num">${s.fugacity_max_APE_percent.toExponential(2)}</td>` +
+            `<td class="num">${s.h_J_mol_MAE.toExponential(2)}</td>` +
+            `<td class="num">${s.h_J_mol_max_AE.toExponential(2)}</td>` +
+            `<td class="num">${s.s_J_mol_K_MAE.toExponential(2)}</td>` +
+            `<td class="num">${s.s_J_mol_K_max_AE.toExponential(2)}</td>`;
+          bBody.appendChild(tr);
+        });
+      }
+    }
+
+    function downloadCSV(filename, text) {
+      const blob = new Blob([text], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById("downloadPropsBtn").addEventListener("click", () => {
+      downloadCSV(`${gasSelect.value}_properties.csv`, lastPropsCSV);
+    });
+    document.getElementById("downloadCurveBtn").addEventListener("click", () => {
+      downloadCSV(`${gasSelect.value}_pressure_curve.csv`, lastCurveCSV);
+    });
+
+    gasSelect.addEventListener("change", () => {
+      updateBoundsOnGasOrUnitChange(true);
+      const gas = gasSelect.value;
+      const T = parseFloat(tempInput.value) + (tempUnit.value === "C" ? 273.15 : 0);
+      volumeInput.value = (predictLocalRBF(T, 2e6, gas, 1.0).v_m3_mol * 1000).toFixed(5);
+      updateApp();
+    });
+    tempUnit.addEventListener("change", () => { updateBoundsOnGasOrUnitChange(true); updateApp(); });
+    pUnit.addEventListener("change", () => { updateBoundsOnGasOrUnitChange(true); updateApp(); });
+    document.querySelectorAll('input[name="calcMode"]').forEach(r => r.addEventListener("change", () => {
+      const gas = gasSelect.value;
+      const T = parseFloat(tempInput.value) + (tempUnit.value === "C" ? 273.15 : 0);
+      volumeInput.value = (predictLocalRBF(T, 2e6, gas, 1.0).v_m3_mol * 1000).toFixed(5);
+      updateApp();
+    }));
+    [tempInput, amountInput, pressureInput, volumeInput, plotPropSelect, compareCheck].forEach(el => {
+      el.addEventListener("input", updateApp);
+      el.addEventListener("change", updateApp);
+    });
+
+    updateBoundsOnGasOrUnitChange(true);
+    updateApp();
+  </script>
+</body>
+</html>
