@@ -1,0 +1,78 @@
+{
+  "validation": {
+    "v_MAPE_percent": 7.46710610011192e-09,
+    "v_max_APE_percent": 5.345147990887256e-07,
+    "fugacity_MAPE_percent": 4.1970559623225046e-09,
+    "fugacity_max_APE_percent": 3.268110670973101e-07,
+    "h_J_mol_MAE": 1.0024337697700503e-06,
+    "h_J_mol_max_AE": 8.666388293931959e-05,
+    "s_J_mol_K_MAE": 1.6739196962139297e-09,
+    "s_J_mol_K_max_AE": 1.4003994230904482e-07
+  },
+  "test": {
+    "v_MAPE_percent": 1.073634044081867e-08,
+    "v_max_APE_percent": 1.9755857949554922e-06,
+    "fugacity_MAPE_percent": 5.744237144321776e-09,
+    "fugacity_max_APE_percent": 7.466704365910459e-07,
+    "h_J_mol_MAE": 1.4256915803478876e-06,
+    "h_J_mol_max_AE": 0.00022703900231135776,
+    "s_J_mol_K_MAE": 2.401988892942325e-09,
+    "s_J_mol_K_max_AE": 4.1174125087195534e-07
+  },
+  "boundary": {
+    "v_MAPE_percent": 1.0912685512176612e-08,
+    "v_max_APE_percent": 4.2857334348056497e-07,
+    "fugacity_MAPE_percent": 5.336888136281415e-09,
+    "fugacity_max_APE_percent": 1.6161636473555063e-07,
+    "h_J_mol_MAE": 1.3871888313587988e-06,
+    "h_J_mol_max_AE": 4.740247277368326e-05,
+    "s_J_mol_K_MAE": 2.383478571194725e-09,
+    "s_J_mol_K_max_AE": 8.63864428879424e-08
+  },
+  "learning_curve": [
+    {
+      "points": 1024,
+      "v_MAPE_percent": 3.849170254642195e-05,
+      "v_max_APE_percent": 0.001717343197882304,
+      "fugacity_MAPE_percent": 1.9544124672831766e-05,
+      "fugacity_max_APE_percent": 0.0006781005142952878,
+      "h_J_mol_MAE": 0.005143461296388097,
+      "h_J_mol_max_AE": 0.19930859737178253,
+      "s_J_mol_K_MAE": 8.706670518459367e-06,
+      "s_J_mol_K_max_AE": 0.0003588420760340938
+    },
+    {
+      "points": 4096,
+      "v_MAPE_percent": 2.2568083674848888e-06,
+      "v_max_APE_percent": 0.00014630225778633488,
+      "fugacity_MAPE_percent": 1.1424815886526205e-06,
+      "fugacity_max_APE_percent": 5.7710649714604045e-05,
+      "h_J_mol_MAE": 0.0002991121231481486,
+      "h_J_mol_max_AE": 0.017497287586593302,
+      "s_J_mol_K_MAE": 5.073462642222245e-07,
+      "s_J_mol_K_max_AE": 3.136234367673296e-05
+    },
+    {
+      "points": 16384,
+      "v_MAPE_percent": 1.2190029170539712e-07,
+      "v_max_APE_percent": 7.864965934079038e-06,
+      "fugacity_MAPE_percent": 6.401571683769397e-08,
+      "fugacity_max_APE_percent": 4.800016262240803e-06,
+      "h_J_mol_MAE": 1.6441227227659283e-05,
+      "h_J_mol_max_AE": 0.001280932188819861,
+      "s_J_mol_K_MAE": 2.770055830265787e-08,
+      "s_J_mol_K_max_AE": 2.071360455602189e-06
+    },
+    {
+      "points": 65536,
+      "v_MAPE_percent": 7.46710610011192e-09,
+      "v_max_APE_percent": 5.345147990887256e-07,
+      "fugacity_MAPE_percent": 4.1970559623225046e-09,
+      "fugacity_max_APE_percent": 3.268110670973101e-07,
+      "h_J_mol_MAE": 1.0024337697700503e-06,
+      "h_J_mol_max_AE": 8.666388293931959e-05,
+      "s_J_mol_K_MAE": 1.6739196962139297e-09,
+      "s_J_mol_K_max_AE": 1.4003994230904482e-07
+    }
+  ]
+}

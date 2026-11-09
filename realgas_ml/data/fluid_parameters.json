@@ -1,0 +1,644 @@
+{
+  "package_version": "0.3.0",
+  "source": "Peng-Robinson 1976, implemented directly in realgas_ml/peng_robinson.py",
+  "data_kind": "analytical EOS generated; not experimental measurements",
+  "method": "local quintic RBF kernel regression",
+  "reference_state": "Ideal-gas h=0, s=0 at 300 K and 100000 Pa; add PR departure at actual T,P.",
+  "ideal_reference_T_K": 300.0,
+  "ideal_reference_P_Pa": 100000.0,
+  "source_nasa_url": "https://ntrs.nasa.gov/citations/19940013151",
+  "source_coefficients_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/nasa_gas.yaml",
+  "source_coefficient_file_sha256": "4de6199d65d2d3db782e30573720c723130953707336add59713b02d8667e4db",
+  "fluids": {
+    "Nitrogen": {
+      "Tc_K": 126.2,
+      "Pc_Pa": 3390000.0,
+      "acentric_factor": 0.038,
+      "molar_mass_kg_mol": 0.02801348,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        300.0,
+        600.0
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml",
+      "critical_source_note": "The acentric factor is calculated using the pure fluid saturation data from\nLemmon et al. (2022).",
+      "nasa_species": "N2",
+      "nasa_temperature_ranges_K": [
+        200.0,
+        1000.0,
+        6000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          3.53100528,
+          -0.000123660987,
+          -5.02999437e-07,
+          2.43530612e-09,
+          -1.40881235e-12,
+          -1046.97628,
+          2.96747468
+        ],
+        [
+          2.95257626,
+          0.00139690057,
+          -4.92631691e-07,
+          7.86010367e-11,
+          -4.60755321e-15,
+          -923.948645,
+          5.87189252
+        ]
+      ],
+      "nasa_source_note": "TPIS78"
+    },
+    "Oxygen": {
+      "Tc_K": 154.58,
+      "Pc_Pa": 5043000.0,
+      "acentric_factor": 0.022,
+      "molar_mass_kg_mol": 0.0319988,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        300.0,
+        600.0
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml",
+      "critical_source_note": "The acentric factor is calculated using the pure fluid saturation data from\nLemmon et al. (2022).",
+      "nasa_species": "O2",
+      "nasa_temperature_ranges_K": [
+        200.0,
+        1000.0,
+        6000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          3.78245636,
+          -0.00299673415,
+          9.847302e-06,
+          -9.68129508e-09,
+          3.24372836e-12,
+          -1063.94356,
+          3.65767573
+        ],
+        [
+          3.66096083,
+          0.000656365523,
+          -1.41149485e-07,
+          2.05797658e-11,
+          -1.29913248e-15,
+          -1215.97725,
+          3.41536184
+        ]
+      ],
+      "nasa_source_note": "TPIS89"
+    },
+    "CarbonDioxide": {
+      "Tc_K": 304.2,
+      "Pc_Pa": 7390000.0,
+      "acentric_factor": 0.228,
+      "molar_mass_kg_mol": 0.0440098,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        334.62,
+        600.0
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml",
+      "critical_source_note": "The acentric factor is taken from Yaws (2001).",
+      "nasa_species": "CO2",
+      "nasa_temperature_ranges_K": [
+        200.0,
+        1000.0,
+        6000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          2.35677352,
+          0.00898459677,
+          -7.12356269e-06,
+          2.45919022e-09,
+          -1.43699548e-13,
+          -48371.9697,
+          9.90105222
+        ],
+        [
+          4.63659493,
+          0.00274131991,
+          -9.95828531e-07,
+          1.60373011e-10,
+          -9.16103468e-15,
+          -49024.9341,
+          -1.93534855
+        ]
+      ],
+      "nasa_source_note": "L 7/88"
+    },
+    "Hydrogen": {
+      "Tc_K": 32.98,
+      "Pc_Pa": 1293000.0,
+      "acentric_factor": -0.217,
+      "molar_mass_kg_mol": 0.00201588,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        300.0,
+        600.0
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml",
+      "critical_source_note": "Properties of Gases and Liquids, 5th edition, Poling.",
+      "nasa_species": "H2",
+      "nasa_temperature_ranges_K": [
+        200.0,
+        1000.0,
+        6000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          2.34433112,
+          0.00798052075,
+          -1.9478151e-05,
+          2.01572094e-08,
+          -7.37611761e-12,
+          -917.935173,
+          0.683010238
+        ],
+        [
+          2.93286579,
+          0.000826607967,
+          -1.46402335e-07,
+          1.54100359e-11,
+          -6.88804432e-16,
+          -813.065597,
+          -1.02432887
+        ]
+      ],
+      "nasa_source_note": "TPIS78"
+    },
+    "Helium": {
+      "Tc_K": 5.1953,
+      "Pc_Pa": 228322.7892147868,
+      "acentric_factor": -0.38353992538323034,
+      "molar_mass_kg_mol": 0.004002602,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        300.0,
+        600.0
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://coolprop.org/fluid_properties/fluids/Helium.html",
+      "critical_source_note": "Tabulated static constants only; no property-library calls.",
+      "nasa_species": "He",
+      "nasa_temperature_ranges_K": [
+        200.0,
+        6000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          2.5,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -745.375,
+          0.928724724
+        ]
+      ],
+      "nasa_source_note": "L10/90"
+    },
+    "Argon": {
+      "Tc_K": 150.687,
+      "Pc_Pa": 4863000.544876669,
+      "acentric_factor": -0.00219,
+      "molar_mass_kg_mol": 0.039948,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        300.0,
+        600.0
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://coolprop.org/fluid_properties/fluids/Argon.html",
+      "critical_source_note": "Tabulated static constants only; no property-library calls.",
+      "nasa_species": "Ar",
+      "nasa_temperature_ranges_K": [
+        200.0,
+        6000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          2.5,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -745.375,
+          4.37967491
+        ]
+      ],
+      "nasa_source_note": "L 6/88"
+    },
+    "Neon": {
+      "Tc_K": 44.4,
+      "Pc_Pa": 2661630.706279463,
+      "acentric_factor": -0.03549258024442481,
+      "molar_mass_kg_mol": 0.020179,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        300.0,
+        600.0
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://coolprop.org/fluid_properties/fluids/Neon.html",
+      "critical_source_note": "Tabulated static constants only; no property-library calls.",
+      "nasa_species": "Ne",
+      "nasa_temperature_ranges_K": [
+        200.0,
+        6000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          2.5,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -745.375,
+          3.35532272
+        ]
+      ],
+      "nasa_source_note": "L10/90"
+    },
+    "Methane": {
+      "Tc_K": 190.7,
+      "Pc_Pa": 4630000.0,
+      "acentric_factor": 0.011,
+      "molar_mass_kg_mol": 0.0160428,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        300.0,
+        600.0
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml",
+      "critical_source_note": "Initial database of critical properties compiled from various sources by\nC. Karakaya (https://orcid.org/0000-0001-5102-5476)\n\nAdditional data sources:\n\nLemmon, E W; Bell, I H; Huber, M L; and McLinden, M O. (2022). \"Thermophysical\n    Properties of Fluid Systems\" in NIST Chemistry WebBook, NIST Standard Reference\n    Database Number 69, Eds. P J  Linstrom and W G Mallard, National Institute of\n    Standards and Technology, Gaithersburg MD, 20899, https://doi.org/10.18434/T4D303.\n\nYaws, C L. (2001). Matheson Gas Data Book. 7th Edition McGraw-Hill.\n    ISBN 978-0-07-135854-5.",
+      "nasa_species": "CH4",
+      "nasa_temperature_ranges_K": [
+        200.0,
+        1000.0,
+        6000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          5.14987613,
+          -0.0136709788,
+          4.91800599e-05,
+          -4.84743026e-08,
+          1.66693956e-11,
+          -10246.6476,
+          -4.64130376
+        ],
+        [
+          1.63552643,
+          0.0100842795,
+          -3.36916254e-06,
+          5.34958667e-10,
+          -3.15518833e-14,
+          -10005.6455,
+          9.99313326
+        ]
+      ],
+      "nasa_source_note": "L 8/88"
+    },
+    "Ethane": {
+      "Tc_K": 305.4,
+      "Pc_Pa": 4880000.0,
+      "acentric_factor": 0.099,
+      "molar_mass_kg_mol": 0.03006904,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        335.94,
+        600.0
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml",
+      "critical_source_note": "Initial database of critical properties compiled from various sources by\nC. Karakaya (https://orcid.org/0000-0001-5102-5476)\n\nAdditional data sources:\n\nLemmon, E W; Bell, I H; Huber, M L; and McLinden, M O. (2022). \"Thermophysical\n    Properties of Fluid Systems\" in NIST Chemistry WebBook, NIST Standard Reference\n    Database Number 69, Eds. P J  Linstrom and W G Mallard, National Institute of\n    Standards and Technology, Gaithersburg MD, 20899, https://doi.org/10.18434/T4D303.\n\nYaws, C L. (2001). Matheson Gas Data Book. 7th Edition McGraw-Hill.\n    ISBN 978-0-07-135854-5.",
+      "nasa_species": "C2H6",
+      "nasa_temperature_ranges_K": [
+        200.0,
+        1000.0,
+        6000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          4.29142492,
+          -0.0055015427,
+          5.99438288e-05,
+          -7.08466285e-08,
+          2.68685771e-11,
+          -11522.2055,
+          2.66682316
+        ],
+        [
+          4.04666674,
+          0.0153538766,
+          -5.47039321e-06,
+          8.77826228e-10,
+          -5.23167305e-14,
+          -12447.3512,
+          -0.968683607
+        ]
+      ],
+      "nasa_source_note": "L 8/88"
+    },
+    "Propane": {
+      "Tc_K": 369.7,
+      "Pc_Pa": 4250000.0,
+      "acentric_factor": 0.153,
+      "molar_mass_kg_mol": 0.04409562,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        406.8790098460598,
+        628.8130152166378
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml",
+      "critical_source_note": "Initial database of critical properties compiled from various sources by\nC. Karakaya (https://orcid.org/0000-0001-5102-5476)\n\nAdditional data sources:\n\nLemmon, E W; Bell, I H; Huber, M L; and McLinden, M O. (2022). \"Thermophysical\n    Properties of Fluid Systems\" in NIST Chemistry WebBook, NIST Standard Reference\n    Database Number 69, Eds. P J  Linstrom and W G Mallard, National Institute of\n    Standards and Technology, Gaithersburg MD, 20899, https://doi.org/10.18434/T4D303.\n\nYaws, C L. (2001). Matheson Gas Data Book. 7th Edition McGraw-Hill.\n    ISBN 978-0-07-135854-5.",
+      "nasa_species": "C3H8",
+      "nasa_temperature_ranges_K": [
+        200.0,
+        1000.0,
+        6000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          4.2110262,
+          0.00171599803,
+          7.06183472e-05,
+          -9.19594116e-08,
+          3.64421372e-11,
+          -14381.2106,
+          5.60930491
+        ],
+        [
+          6.66789363,
+          0.0206120214,
+          -7.36553027e-06,
+          1.18440761e-09,
+          -7.0695321e-14,
+          -16274.8521,
+          -13.1859503
+        ]
+      ],
+      "nasa_source_note": "L 6/90"
+    },
+    "n-Butane": {
+      "Tc_K": 425.6,
+      "Pc_Pa": 3760000.0,
+      "acentric_factor": 0.199,
+      "molar_mass_kg_mol": 0.0581222,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        468.1600000000001,
+        574.0
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml",
+      "critical_source_note": "Initial database of critical properties compiled from various sources by\nC. Karakaya (https://orcid.org/0000-0001-5102-5476)\n\nAdditional data sources:\n\nLemmon, E W; Bell, I H; Huber, M L; and McLinden, M O. (2022). \"Thermophysical\n    Properties of Fluid Systems\" in NIST Chemistry WebBook, NIST Standard Reference\n    Database Number 69, Eds. P J  Linstrom and W G Mallard, National Institute of\n    Standards and Technology, Gaithersburg MD, 20899, https://doi.org/10.18434/T4D303.\n\nYaws, C L. (2001). Matheson Gas Data Book. 7th Edition McGraw-Hill.\n    ISBN 978-0-07-135854-5.",
+      "nasa_species": "C4H10,n-butane",
+      "nasa_temperature_ranges_K": [
+        200.0,
+        1000.0,
+        6000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          6.14746806,
+          0.000155947389,
+          9.67913517e-05,
+          -1.2548391e-07,
+          4.97816555e-11,
+          -17599.4402,
+          -1.09409879
+        ],
+        [
+          9.44535834,
+          0.0257858073,
+          -9.23619122e-06,
+          1.48632755e-09,
+          -8.87897158e-14,
+          -20138.2165,
+          -26.3470076
+        ]
+      ],
+      "nasa_source_note": "L 6/90"
+    },
+    "CarbonMonoxide": {
+      "Tc_K": 133.4,
+      "Pc_Pa": 3500000.0,
+      "acentric_factor": 0.066,
+      "molar_mass_kg_mol": 0.0280101,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        300.0,
+        499.0
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml",
+      "critical_source_note": "Initial database of critical properties compiled from various sources by\nC. Karakaya (https://orcid.org/0000-0001-5102-5476)\n\nAdditional data sources:\n\nLemmon, E W; Bell, I H; Huber, M L; and McLinden, M O. (2022). \"Thermophysical\n    Properties of Fluid Systems\" in NIST Chemistry WebBook, NIST Standard Reference\n    Database Number 69, Eds. P J  Linstrom and W G Mallard, National Institute of\n    Standards and Technology, Gaithersburg MD, 20899, https://doi.org/10.18434/T4D303.\n\nYaws, C L. (2001). Matheson Gas Data Book. 7th Edition McGraw-Hill.\n    ISBN 978-0-07-135854-5.",
+      "nasa_species": "CO",
+      "nasa_temperature_ranges_K": [
+        200.0,
+        1000.0,
+        6000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          3.57953347,
+          -0.00061035368,
+          1.01681433e-06,
+          9.07005884e-10,
+          -9.04424499e-13,
+          -14344.086,
+          3.50840928
+        ],
+        [
+          3.04848583,
+          0.00135172818,
+          -4.85794075e-07,
+          7.88536486e-11,
+          -4.69807489e-15,
+          -14266.1171,
+          6.0170979
+        ]
+      ],
+      "nasa_source_note": "TPIS79"
+    },
+    "Ammonia": {
+      "Tc_K": 405.56,
+      "Pc_Pa": 11363391.157414673,
+      "acentric_factor": 0.2556905229865023,
+      "molar_mass_kg_mol": 0.01703052,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        446.11600000000004,
+        689.451999954548
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://coolprop.org/fluid_properties/fluids/Ammonia.html",
+      "critical_source_note": "Tabulated static constants only; no property-library calls.",
+      "nasa_species": "NH3",
+      "nasa_temperature_ranges_K": [
+        200.0,
+        1000.0,
+        6000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          4.30177808,
+          -0.0047712733,
+          2.19341619e-05,
+          -2.29856489e-08,
+          8.28992268e-12,
+          -6748.06394,
+          -0.690644393
+        ],
+        [
+          2.71709692,
+          0.00556856338,
+          -1.76886396e-06,
+          2.6741726e-10,
+          -1.52731419e-14,
+          -6584.51989,
+          6.09289837
+        ]
+      ],
+      "nasa_source_note": "TPIS89"
+    },
+    "SulfurDioxide": {
+      "Tc_K": 430.64,
+      "Pc_Pa": 7886578.976938645,
+      "acentric_factor": 0.2561299361987246,
+      "molar_mass_kg_mol": 0.0640638,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        473.7040006952699,
+        524.0
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://coolprop.org/fluid_properties/fluids/SulfurDioxide.html",
+      "critical_source_note": "Tabulated static constants only; no property-library calls.",
+      "nasa_species": "SO2",
+      "nasa_temperature_ranges_K": [
+        300.0,
+        1000.0,
+        5000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          3.2665338,
+          0.0053237902,
+          6.8437552e-07,
+          -5.2810047e-09,
+          2.5590454e-12,
+          -36908.148,
+          9.66465108
+        ],
+        [
+          5.2451364,
+          0.0019704204,
+          -8.0375769e-07,
+          1.5149969e-10,
+          -1.0558004e-14,
+          -37558.227,
+          -1.07404892
+        ]
+      ],
+      "nasa_source_note": "J 6/61"
+    },
+    "Water": {
+      "Tc_K": 647.096,
+      "Pc_Pa": 22064000.0,
+      "acentric_factor": 0.3442920843,
+      "molar_mass_kg_mol": 0.018015268,
+      "gas_constant_J_mol_K": 8.31446261815324,
+      "T_range_K": [
+        711.8056,
+        1100.0631999999782
+      ],
+      "P_range_Pa": [
+        100000.0,
+        5000000.0
+      ],
+      "critical_source_url": "https://coolprop.org/fluid_properties/fluids/Water.html",
+      "critical_source_note": "Tabulated static constants only; no property-library calls.",
+      "nasa_species": "H2O",
+      "nasa_temperature_ranges_K": [
+        200.0,
+        1000.0,
+        6000.0
+      ],
+      "nasa7_coefficients": [
+        [
+          4.19864056,
+          -0.0020364341,
+          6.52040211e-06,
+          -5.48797062e-09,
+          1.77197817e-12,
+          -30293.7267,
+          -0.849032208
+        ],
+        [
+          2.67703787,
+          0.00297318329,
+          -7.7376969e-07,
+          9.44336689e-11,
+          -4.26900959e-15,
+          -29885.8938,
+          6.88255571
+        ]
+      ],
+      "nasa_source_note": "L 8/89"
+    }
+  }
+}
