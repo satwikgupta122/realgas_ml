@@ -307,16 +307,19 @@
 
     <div class="sidebar-links">
       <div><strong>Project Resources</strong></div>
-      <a href="realgas_ml_report.pdf" target="_blank">📄 Project Report (PDF)</a>
+      <a href="realgas_ml_report.pdf" target="_blank">📄 Project Report (4-Page PDF)</a>
       <a href="realgas_ml_report.tex" target="_blank">📝 LaTeX Source (.tex)</a>
       <a href="https://github.com/satwikgupta122/realgas_ml" target="_blank">💻 GitHub Repository</a>
+      <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/README.md" target="_blank">📖 Project README</a>
+      <a href="https://github.com/satwikgupta122/realgas_ml/tree/main/realgas_ml/data" target="_blank">📂 Datasets &amp; Metrics</a>
+      <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/realgas_ml/peng_robinson.py" target="_blank">⚙️ Peng–Robinson Solver</a>
     </div>
   </aside>
 
   <main class="main">
-    <div class="eyebrow">Chemical Engineering Thermodynamics · S. Gupta &amp; U. Jaipuria</div>
+    <div class="eyebrow">Chemical Engineering Thermodynamics · S. Gupta (2025CH11012) &amp; U. Jaipuria (2025CH11729)</div>
     <h1>Real gas lab (realgas-ml v0.3.0)</h1>
-    <p class="subtitle">Predict supercritical PVT properties, enthalpy, entropy, and fugacity for 15 pure gases using our local RBF machine learning model and the Peng–Robinson (1976) equation of state.</p>
+    <p class="subtitle">Predict supercritical PVT properties, enthalpy, entropy, and fugacity for 15 pure gases using our local RBF machine learning model and the <a href="https://doi.org/10.1021/i160057a011" target="_blank" style="color:var(--teal);text-decoration:none;font-weight:600;">Peng–Robinson (1976)</a> equation of state.</p>
 
     <div id="errorBox" class="error-box"></div>
 
@@ -349,7 +352,7 @@
         <button class="tab-btn active" data-tab="tabProps">All properties</button>
         <button class="tab-btn" data-tab="tabPlot">Pressure trends</button>
         <button class="tab-btn" data-tab="tabBench">Model accuracy</button>
-        <button class="tab-btn" data-tab="tabNotes">Report &amp; theory</button>
+        <button class="tab-btn" data-tab="tabNotes">Report &amp; links</button>
       </div>
 
       <div id="tabProps" class="tab-panel active">
@@ -379,7 +382,7 @@
       </div>
 
       <div id="tabBench" class="tab-panel">
-        <p class="caption" style="font-size:0.88rem;margin-bottom:12px;">Interior test (N = 2,048) and boundary test (N = 256) errors for the selected gas from <code>realgas_ml/data/&lt;Fluid&gt;_metrics.json</code>:</p>
+        <p class="caption" style="font-size:0.88rem;margin-bottom:12px;">Interior test (N = 2,048) and boundary test (N = 256) errors for the selected gas from <a id="metricsFileLink" href="https://github.com/satwikgupta122/realgas_ml/blob/main/realgas_ml/data/CarbonDioxide_metrics.json" target="_blank" style="color:var(--teal);font-weight:600;"><code>realgas_ml/data/CarbonDioxide_metrics.json</code></a> (verified by <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/tests/test_properties.py" target="_blank" style="color:var(--teal);font-weight:600;"><code>tests/test_properties.py</code></a>):</p>
         <table>
           <thead>
             <tr>
@@ -404,11 +407,31 @@
 
       <div id="tabNotes" class="tab-panel">
         <div class="notes-card">
-          <p><strong>Z</strong> measures how much a real gas deviates from ideal-gas volume: <em>Z = 1</em> is an ideal gas at that temperature and pressure.</p>
-          <p><strong>Fugacity</strong> is <em>f = φP</em>, where the fugacity coefficient <em>φ</em> measures how much the chemical potential deviates from an ideal gas. Fugacity has pressure units and is an intensive property (it does not change with the number of moles <em>n</em>).</p>
-          <p><strong>h and s</strong> are molar properties; <strong>H = nh</strong> and <strong>S = ns</strong> are total properties for <em>n</em> moles. The ideal-gas reference state is <em>h<sub>ig</sub> = s<sub>ig</sub> = 0</em> at 300 K and 1 bar, with Peng–Robinson real-gas departures added at the actual state.</p>
-          <p><strong>Scope &amp; Accuracy:</strong> 15 pure supercritical gases above 1.10 <em>T<sub>c</sub></em> from 1 to 50 bar. Each gas model uses 48-neighbor local quintic RBF interpolation (<em>φ(r) = −r<sup>5</sup></em>) with a quadratic polynomial on a 256 × 256 normalized (<em>T</em>, ln <em>P</em>) grid.</p>
-          <p><a class="btn" href="realgas_ml_report.pdf" target="_blank">Open 4-Page Project Report (PDF)</a></p>
+          <h3 style="margin-top:0;color:var(--slate);">Thermodynamic Equations &amp; Model Overview</h3>
+          <p><strong>Compressibility (Z)</strong> measures how much a real gas deviates from ideal-gas volume (<em>Z = Pv / RT</em>, where <em>Z = 1</em> for an ideal gas). Our solver in <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/realgas_ml/peng_robinson.py" target="_blank"><code>realgas_ml/peng_robinson.py</code></a> solves the cubic <a href="https://doi.org/10.1021/i160057a011" target="_blank">Peng–Robinson (1976)</a> polynomial at 65,536 states per gas.</p>
+          <p><strong>Fugacity</strong> is <em>f = φP</em>, where the fugacity coefficient <em>φ</em> measures how much the chemical potential deviates from an ideal gas (<a href="https://ejmaginn.github.io/CBE20260-notes/class34/fugacity-EOS.html" target="_blank">Maginn, CBE 20260</a>). Fugacity has pressure units and is an intensive property (it does not change when the number of moles <em>n</em> changes).</p>
+          <p><strong>Enthalpy (h) and Entropy (s)</strong> are molar properties; <strong>H = nh</strong> and <strong>S = ns</strong> are total properties for <em>n</em> moles. Ideal-gas changes are integrated analytically from <a href="https://ntrs.nasa.gov/citations/19940013151" target="_blank">NASA 7-coefficient polynomials</a> starting from <em>h<sub>ig</sub> = s<sub>ig</sub> = 0</em> at 300 K and 1 bar, with Peng–Robinson real-gas departures added at the actual (<em>T, P</em>) state.</p>
+          <p><strong>Local RBF Machine Learning Model:</strong> In <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/realgas_ml/regressor.py" target="_blank"><code>realgas_ml/regressor.py</code></a> and <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/realgas_ml/model.py" target="_blank"><code>realgas_ml/model.py</code></a>, each gas is fitted over normalized (<em>T</em>, ln <em>P</em>) ∈ [0, 1]² using 48-neighbor local quintic RBF interpolation (<em>φ(r) = −r<sup>5</sup></em>) with a quadratic polynomial trend to predict [ln <em>Z</em>, <em>h</em>, <em>s</em>, ln <em>φ</em>].</p>
+          <p style="display:flex;gap:12px;flex-wrap:wrap;margin:14px 0 18px 0;">
+            <a class="btn" href="realgas_ml_report.pdf" target="_blank" style="margin-top:0;">📄 Open 4-Page Project Report (PDF)</a>
+            <a class="btn" href="realgas_ml_report.tex" target="_blank" style="margin-top:0;background:var(--slate);">📝 View LaTeX Source (.tex)</a>
+            <a class="btn" href="https://github.com/satwikgupta122/realgas_ml" target="_blank" style="margin-top:0;background:#2b4c59;">💻 GitHub Repository</a>
+          </p>
+          <h3 style="color:var(--slate);margin-bottom:8px;">Repository Code &amp; Data Links</h3>
+          <ul style="margin:0 0 16px 0;padding-left:20px;line-height:1.7;">
+            <li><strong>Core Package:</strong> <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/realgas_ml/peng_robinson.py" target="_blank"><code>realgas_ml/peng_robinson.py</code></a> · <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/realgas_ml/regressor.py" target="_blank"><code>realgas_ml/regressor.py</code></a> · <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/realgas_ml/model.py" target="_blank"><code>realgas_ml/model.py</code></a> · <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/realgas_ml/cli.py" target="_blank"><code>realgas_ml/cli.py</code></a></li>
+            <li><strong>Scripts &amp; App:</strong> <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/train.py" target="_blank"><code>train.py</code></a> · <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/app.py" target="_blank"><code>app.py</code></a> · <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/export_data.py" target="_blank"><code>export_data.py</code></a> · <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/example.py" target="_blank"><code>example.py</code></a> · <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/pyproject.toml" target="_blank"><code>pyproject.toml</code></a> · <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/README.md" target="_blank"><code>README.md</code></a></li>
+            <li><strong>Data &amp; Tests:</strong> <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/realgas_ml/data/metadata.json" target="_blank"><code>realgas_ml/data/metadata.json</code></a> · <a href="https://github.com/satwikgupta122/realgas_ml/tree/main/realgas_ml/data" target="_blank"><code>realgas_ml/data/*_metrics.json</code></a> · <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/tests/test_properties.py" target="_blank"><code>tests/test_properties.py</code></a> · <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/tests/test_app.py" target="_blank"><code>tests/test_app.py</code></a></li>
+          </ul>
+          <h3 style="color:var(--slate);margin-bottom:8px;">Literature &amp; Property Data References</h3>
+          <ol style="margin:0;padding-left:20px;line-height:1.7;">
+            <li>Peng, D.-Y., &amp; Robinson, D. B. (1976). A New Two-Constant Equation of State. <em>Ind. Eng. Chem. Fundam.</em>, 15(1), 59–64. <a href="https://doi.org/10.1021/i160057a011" target="_blank">https://doi.org/10.1021/i160057a011</a></li>
+            <li>McBride, B. J., Gordon, S., &amp; Reno, M. A. (1993). <em>NASA Technical Memorandum 4513</em>. <a href="https://ntrs.nasa.gov/citations/19940013151" target="_blank">https://ntrs.nasa.gov/citations/19940013151</a></li>
+            <li>Cantera 3.2.0 Thermodynamic Database: <a href="https://www.cantera.org/stable/reference/thermo/species-thermo.html" target="_blank">Species Thermo Reference</a>, <a href="https://github.com/Cantera/cantera/blob/v3.2.0/data/nasa_gas.yaml" target="_blank"><code>nasa_gas.yaml</code></a>, <a href="https://github.com/Cantera/cantera/blob/v3.2.0/data/critical-properties.yaml" target="_blank"><code>critical-properties.yaml</code></a>, and <a href="https://github.com/satwikgupta122/realgas_ml/blob/main/THIRD_PARTY_NOTICES.txt" target="_blank"><code>THIRD_PARTY_NOTICES.txt</code></a>.</li>
+            <li>Lemmon, E. W., et al. (2022). <em>NIST Chemistry WebBook, SRD 69</em>. <a href="https://doi.org/10.18434/T4D303" target="_blank">https://doi.org/10.18434/T4D303</a></li>
+            <li>CoolProp Fluid Reference Tables: <a href="https://coolprop.org/fluid_properties/fluids/Helium.html" target="_blank">Helium</a>, <a href="https://coolprop.org/fluid_properties/fluids/Neon.html" target="_blank">Neon</a>, <a href="https://coolprop.org/fluid_properties/fluids/Argon.html" target="_blank">Argon</a>, <a href="https://coolprop.org/fluid_properties/fluids/Ammonia.html" target="_blank">Ammonia</a>, <a href="https://coolprop.org/fluid_properties/fluids/SulfurDioxide.html" target="_blank">SulfurDioxide</a>, and <a href="https://coolprop.org/fluid_properties/fluids/Water.html" target="_blank">Water</a>.</li>
+            <li>Maginn, E. J. <em>CBE 20260 Lecture Notes: Fugacity from Equations of State</em>. <a href="https://ejmaginn.github.io/CBE20260-notes/class34/fugacity-EOS.html" target="_blank">CBE20260 Fugacity-EOS Notes</a></li>
+          </ol>
         </div>
       </div>
     </div>
@@ -815,7 +838,12 @@
       const pr = directPR(T, P, gas, n);
 
       document.getElementById("stateHeader").textContent = `${gas} · ${T.toFixed(2)} K · ${(P / 1e5).toFixed(4)} bar`;
-      document.getElementById("stateSubheader").textContent = `${n} mol · Local quintic RBF prediction vs. analytical Peng–Robinson (PR76)`;
+      document.getElementById("stateSubheader").innerHTML = `${n} mol · Local quintic RBF model vs. direct Peng–Robinson · <a href="${info.critical_source_url}" target="_blank" style="color:var(--teal);text-decoration:none;font-weight:600;">Fluid constants source</a>`;
+      const mLink = document.getElementById("metricsFileLink");
+      if (mLink) {
+        mLink.href = mLink.href.replace(/[A-Za-z0-9-]+_metrics\.json/, gas + "_metrics.json");
+        mLink.innerHTML = `<code>realgas_ml/data/${gas}_metrics.json</code>`;
+      }
       document.getElementById("metricZ").textContent = ml.Z.toFixed(6);
       document.getElementById("metricV").textContent = Number((ml.v_m3_mol * 1000).toPrecision(6)).toString();
       document.getElementById("metricF").textContent = Number((ml.fugacity_Pa / 1e5).toPrecision(6)).toString();
