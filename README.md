@@ -45,8 +45,7 @@ realgas_ml/
 ├── export_data.py                   # Script to export NumPy Zip (NPZ) datasets to Comma-Separated Values (CSV)
 ├── example.py                       # Simple Python Application Programming Interface (API) example script
 ├── run_app.bat                      # Windows launcher for the Streamlit app
-├── pyproject.toml                   # Package build configuration
-└── THIRD_PARTY_NOTICES.txt          # BSD 3-Clause license notice for NASA7 tables
+└── pyproject.toml                   # Package build configuration
 ```
 
 ## How to Install and Run
@@ -164,4 +163,3 @@ Across all 15 gases on both the Interior Test Split ($N=2{,}048$) and Boundary T
 - Cantera 3.2.0 NASA 7-coefficient polynomial reference: https://www.cantera.org/stable/reference/thermo/species-thermo.html
 - Lemmon, E. W., et al. (2022), *National Institute of Standards and Technology (NIST) Chemistry WebBook, SRD 69*: https://doi.org/10.18434/T4D303
 - Maginn, E. J., *CBE 20260 Fugacity from Equations of State*: https://ejmaginn.github.io/CBE20260-notes/class34/fugacity-EOS.html
-- License notices for the static NASA7 coefficient tables are in [`THIRD_PARTY_NOTICES.txt`](THIRD_PARTY_NOTICES.txt).
