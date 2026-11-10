@@ -307,7 +307,7 @@
 
     <div class="sidebar-links">
       <div><strong>Project Resources</strong></div>
-      <a href="realgas_ml_report.pdf" target="_blank">📄 Technical Report (PDF)</a>
+      <a href="realgas_ml_report.pdf" target="_blank">📄 Project Report (PDF)</a>
       <a href="realgas_ml_report.tex" target="_blank">📝 LaTeX Source (.tex)</a>
       <a href="https://github.com/satwikgupta122/realgas_ml" target="_blank">💻 GitHub Repository</a>
     </div>
@@ -316,14 +316,14 @@
   <main class="main">
     <div class="eyebrow">Chemical Engineering Thermodynamics · S. Gupta &amp; U. Jaipuria</div>
     <h1>Real gas lab (realgas-ml v0.3.0)</h1>
-    <p class="subtitle">Explore supercritical PVT behaviour, caloric departures, and fugacity for 15 pure fluids via 48-neighbor local quintic RBF surrogates and analytical Peng–Robinson (1976) calculations.</p>
+    <p class="subtitle">Predict supercritical PVT properties, enthalpy, entropy, and fugacity for 15 pure gases using our local RBF machine learning model and the Peng–Robinson (1976) equation of state.</p>
 
     <div id="errorBox" class="error-box"></div>
 
     <div id="resultsContent">
       <div class="state-banner">
         <h3 id="stateHeader">CarbonDioxide · 400.00 K · 20.0000 bar</h3>
-        <div class="caption" id="stateSubheader">1 mol · Local quintic RBF surrogate (k=48, m=2) trained on 65,536 Peng–Robinson states</div>
+        <div class="caption" id="stateSubheader">1 mol · Local quintic RBF model (k=48, m=2) trained on 65,536 Peng–Robinson state points</div>
       </div>
 
       <div class="metrics-grid">
@@ -348,7 +348,7 @@
       <div class="tabs">
         <button class="tab-btn active" data-tab="tabProps">All properties</button>
         <button class="tab-btn" data-tab="tabPlot">Pressure trends</button>
-        <button class="tab-btn" data-tab="tabBench">Validation benchmarks</button>
+        <button class="tab-btn" data-tab="tabBench">Model accuracy</button>
         <button class="tab-btn" data-tab="tabNotes">Report &amp; theory</button>
       </div>
 
@@ -367,23 +367,23 @@
 
       <div id="tabPlot" class="tab-panel">
         <div class="field-group" style="max-width:340px;margin-bottom:10px;">
-          <label for="plotPropSelect">Property to plot (80 geometric pressure nodes, 1–50 bar)</label>
+          <label for="plotPropSelect">Property to plot (80 pressure points, 1–50 bar)</label>
           <select id="plotPropSelect"></select>
         </div>
         <div class="caption" id="plotCaption"></div>
         <div class="chart-box">
           <canvas id="trendCanvas" width="960" height="360"></canvas>
         </div>
-        <div class="caption" style="margin-top:6px;">Teal solid line: Local Quintic RBF Surrogate · Amber dashed markers: Direct Peng–Robinson EOS (curves overlap to 8–10 digits).</div>
+        <div class="caption" style="margin-top:6px;">Teal solid line: Local Quintic RBF ML Model · Amber dashed line: Direct Peng–Robinson EOS (curves overlap to 8–10 digits).</div>
         <button class="btn" id="downloadCurveBtn">Download curve as CSV</button>
       </div>
 
       <div id="tabBench" class="tab-panel">
-        <p class="caption" style="font-size:0.88rem;margin-bottom:12px;">Held-out interior test (N = 2,048) and domain-boundary test (N = 256) surrogate accuracy for the selected fluid from <code>realgas_ml/data/&lt;Fluid&gt;_metrics.json</code>:</p>
+        <p class="caption" style="font-size:0.88rem;margin-bottom:12px;">Interior test (N = 2,048) and boundary test (N = 256) errors for the selected gas from <code>realgas_ml/data/&lt;Fluid&gt;_metrics.json</code>:</p>
         <table>
           <thead>
             <tr>
-              <th>Evaluation Split</th>
+              <th>Test Split</th>
               <th class="num">v MAPE (%)</th>
               <th class="num">v Max APE (%)</th>
               <th class="num">f MAPE (%)</th>
@@ -404,11 +404,11 @@
 
       <div id="tabNotes" class="tab-panel">
         <div class="notes-card">
-          <p><strong>Z</strong> measures departure from ideal-gas volume: <em>Z = 1</em> is ideal at that state.</p>
-          <p><strong>Fugacity</strong> is <em>f = φP</em>. Its coefficient <em>φ</em> measures departure from ideal-gas chemical potential. Fugacity has pressure units and is an intensive property (it does not scale with molar amount <em>n</em>).</p>
-          <p><strong>h and s</strong> are molar properties; <strong>H = nh</strong> and <strong>S = ns</strong> are extensive totals. The ideal-gas reference state is <em>h<sub>ig</sub> = s<sub>ig</sub> = 0</em> at 300 K and 1 bar, with analytical PR76 departures added at the actual state.</p>
-          <p><strong>Scope &amp; Accuracy:</strong> 15 pure supercritical gases above 1.10 <em>T<sub>c</sub></em> across 1–50 bar. Each fluid surrogate uses 48-neighbor local quintic RBF interpolation (<em>φ(r) = −r<sup>5</sup></em>) augmented by a quadratic polynomial on a 256 × 256 normalized (<em>T</em>, ln <em>P</em>) grid.</p>
-          <p><a class="btn" href="realgas_ml_report.pdf" target="_blank">Open Full 4-Page Technical Report (PDF)</a></p>
+          <p><strong>Z</strong> measures how much a real gas deviates from ideal-gas volume: <em>Z = 1</em> is an ideal gas at that temperature and pressure.</p>
+          <p><strong>Fugacity</strong> is <em>f = φP</em>, where the fugacity coefficient <em>φ</em> measures how much the chemical potential deviates from an ideal gas. Fugacity has pressure units and is an intensive property (it does not change with the number of moles <em>n</em>).</p>
+          <p><strong>h and s</strong> are molar properties; <strong>H = nh</strong> and <strong>S = ns</strong> are total properties for <em>n</em> moles. The ideal-gas reference state is <em>h<sub>ig</sub> = s<sub>ig</sub> = 0</em> at 300 K and 1 bar, with Peng–Robinson real-gas departures added at the actual state.</p>
+          <p><strong>Scope &amp; Accuracy:</strong> 15 pure supercritical gases above 1.10 <em>T<sub>c</sub></em> from 1 to 50 bar. Each gas model uses 48-neighbor local quintic RBF interpolation (<em>φ(r) = −r<sup>5</sup></em>) with a quadratic polynomial on a 256 × 256 normalized (<em>T</em>, ln <em>P</em>) grid.</p>
+          <p><a class="btn" href="realgas_ml_report.pdf" target="_blank">Open 4-Page Project Report (PDF)</a></p>
         </div>
       </div>
     </div>

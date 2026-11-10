@@ -1,54 +1,57 @@
-# `realgas-ml` (v0.3.0) — Dense-Data Local Quintic RBF Surrogates for Peng–Robinson Real-Gas Thermodynamics
+# `realgas-ml` (v0.3.0) — Predicting PVT and Thermodynamic Properties of Real Gases Using Peng–Robinson EOS and Machine Learning
 
 **Authors:** Satwik Gupta (`2025CH11012`) & Udhav Jaipuria (`2025CH11729`)  
 **Course Project:** Chemical Engineering Thermodynamics · Department of Chemical Engineering  
-**Live Web Application:** [**`https://satwikgupta122.github.io/realgas_ml/`**](https://satwikgupta122.github.io/realgas_ml/)  
-**Technical Report:** [**`report/realgas_ml_report.pdf`**](report/realgas_ml_report.pdf) ([LaTeX Source](report/realgas_ml_report.tex))
+**Live Web App:** [**`https://satwikgupta122.github.io/realgas_ml/`**](https://satwikgupta122.github.io/realgas_ml/)  
+**Project Report:** [**`report/realgas_ml_report.pdf`**](report/realgas_ml_report.pdf) ([LaTeX Source](report/realgas_ml_report.tex))
 
-`realgas-ml` is a self-contained thermodynamic calculation engine and local kernel regression package that predicts the pressure–volume–temperature ($PVT$), caloric ($h, s$), and phase-equilibrium departure ($\phi, f$) properties of **15 pure supercritical fluids**. Each fluid is trained on **$65{,}536$ analytical states** ($983{,}040$ states in total) synthesized directly from the classical [Peng–Robinson (1976) cubic equation of state](https://doi.org/10.1021/i160057a011) coupled with continuous [NASA 7-coefficient ideal-gas heat-capacity polynomials](https://ntrs.nasa.gov/citations/19940013151). No external runtime property library (such as CoolProp or Cantera) is called during training or inference.
+`realgas-ml` is a Python package and web app built for our Chemical Engineering Thermodynamics course project. It predicts the pressure–volume–temperature ($PVT$), enthalpy ($h$), entropy ($s$), and fugacity ($\phi, f$) properties of **15 pure real gases** in the supercritical region. Each gas model is trained on **$65{,}536$ state points** ($983{,}040$ points in total) calculated directly from the [Peng–Robinson (1976) cubic equation of state](https://doi.org/10.1021/i160057a011) combined with [NASA 7-coefficient ideal-gas heat-capacity polynomials](https://ntrs.nasa.gov/citations/19940013151). No external property library (like CoolProp or Cantera) is called during training or prediction.
 
 ## Repository Structure
 
 ```text
 realgas_ml/
-├── realgas_ml/                      # Core Python package
-│   ├── __init__.py                  # Public package exports (GasModel, gases)
-│   ├── peng_robinson.py             # Analytical PR76 EOS, NASA7 integrals & departures
-│   ├── regressor.py                 # Local quintic RBF interpolator (k=48, degree=2)
-│   ├── model.py                     # Forward (T,P) prediction & Brentq inverse P(T,v) solver
-│   ├── cli.py                       # Command-line entry point (realgas-ml)
+├── realgas_ml/                      # Main Python package
+│   ├── __init__.py                  # Package exports (GasModel, gases)
+│   ├── peng_robinson.py             # Peng-Robinson EOS, NASA7 integrals & departures
+│   ├── regressor.py                 # Local quintic RBF model (k=48, degree=2)
+│   ├── model.py                     # Forward (T,P) prediction & inverse P(T,v) solver
+│   ├── cli.py                       # Command-line tool (realgas-ml)
 │   └── data/                        # Fluid constants, trained models, datasets & metrics
-│       ├── fluid_parameters.json    # Critical constants, NASA7 polynomials & provenance
-│       ├── metadata.json            # Package metadata & training configuration
-│       ├── <Fluid>.joblib           # Serialized LocalRBFRegressor models (15 fluids)
-│       ├── <Fluid>_dataset.npz      # Compressed train/val/test/boundary splits (15 fluids)
-│       └── <Fluid>_metrics.json     # Validation learning curves & held-out errors (15 fluids)
-├── report/                          # Project report & convergence figures
-│   ├── realgas_ml_report.pdf        # Compiled 4-page technical report
-│   ├── realgas_ml_report.tex        # LaTeX manuscript source
-│   ├── fig_learning_curves.pdf      # Multi-grid validation convergence figure (PDF)
-│   ├── fig_learning_curves.png      # Multi-grid validation convergence figure (PNG)
-│   ├── fig_test_boundary_errors.pdf # Interior vs. boundary error benchmark figure (PDF)
-│   └── fig_test_boundary_errors.png # Interior vs. boundary error benchmark figure (PNG)
+│       ├── fluid_parameters.json    # Critical constants, NASA7 coefficients & sources
+│       ├── metadata.json            # Package metadata & training settings
+│       ├── <Fluid>.joblib           # Saved LocalRBFRegressor models (15 gases)
+│       ├── <Fluid>_dataset.npz      # Train/validation/test/boundary splits (15 gases)
+│       └── <Fluid>_metrics.json     # Learning curves & test set errors (15 gases)
+├── report/                          # Project report & figures
+│   ├── realgas_ml_report.pdf        # 4-page project report (PDF)
+│   ├── realgas_ml_report.tex        # LaTeX source file
+│   ├── fig_learning_curves.pdf      # Validation learning curves (PDF)
+│   ├── fig_learning_curves.png      # Validation learning curves (PNG)
+│   ├── fig_test_boundary_errors.pdf # Interior vs. boundary test errors (PDF)
+│   └── fig_test_boundary_errors.png # Interior vs. boundary test errors (PNG)
+├── docs/                            # Interactive web app for GitHub Pages
+│   └── index.html                   # Browser-based Real Gas Lab calculator
 ├── tests/                           # Automated pytest suite (47 tests)
-│   ├── test_properties.py           # Maxwell relations, Gibbs-Helmholtz & surrogate gates
+│   ├── test_properties.py           # Thermodynamic identities & model accuracy checks
 │   └── test_app.py                  # Streamlit UI, unit conversion & molar scaling tests
-├── .streamlit/config.toml           # Streamlit laboratory theme configuration
-├── .gitignore                       # Standard Python, pytest & LaTeX ignore rules
-├── app.py                           # Interactive Streamlit web laboratory
-├── train.py                         # End-to-end PR76 dataset generation & RBF training loop
-├── export_data.py                   # Bulk NPZ-to-CSV dataset exporter
-├── example.py                       # Minimal Python API usage script
-├── run_app.bat                      # Windows launcher for the Streamlit UI
-├── pyproject.toml                   # Build specification & dependencies
-└── THIRD_PARTY_NOTICES.txt          # BSD 3-Clause license notice for static NASA7 tables
+├── .streamlit/config.toml           # Streamlit theme settings
+├── .gitignore                       # Git ignore rules
+├── requirements.txt                 # Dependencies for Streamlit Cloud deployment
+├── app.py                           # Interactive Streamlit web app
+├── train.py                         # Dataset generation & model training script
+├── export_data.py                   # Script to export NPZ datasets to CSV
+├── example.py                       # Simple Python API example script
+├── run_app.bat                      # Windows launcher for the Streamlit app
+├── pyproject.toml                   # Package build configuration
+└── THIRD_PARTY_NOTICES.txt          # BSD 3-Clause license notice for NASA7 tables
 ```
 
-## Quickstart
+## How to Install and Run
 
-### 1. Browser Interface (Recommended)
+### 1. Browser Interface (Live Web App or Local Streamlit App)
 
-Clone the repository and install the package with optional Streamlit UI dependencies:
+You can use the live browser app directly at [**`https://satwikgupta122.github.io/realgas_ml/`**](https://satwikgupta122.github.io/realgas_ml/), or clone the repository and run the Streamlit app locally:
 
 ```bash
 git clone https://github.com/satwikgupta122/realgas_ml.git
@@ -57,9 +60,9 @@ python -m pip install ".[ui]"
 python -m streamlit run app.py
 ```
 
-Open `http://localhost:8501` if the browser does not open automatically (Windows users can double-click `run_app.bat` after installation). Choose a gas and specify temperature (`K` or `°C`), pressure (`bar`, `kPa`, `MPa`, or `Pa`), and molar amount (`mol`), or switch to **Temperature + molar volume** mode for inverse $P(T,v)$ lookups. You can compare surrogate predictions side-by-side against direct Peng–Robinson calculations, plot 80-point geometric-pressure curves, and export results to CSV.
+Open `http://localhost:8501` if the browser does not open automatically (Windows users can double-click `run_app.bat` after installation). Choose a gas and enter temperature (`K` or `°C`), pressure (`bar`, `kPa`, `MPa`, or `Pa`), and number of moles (`mol`), or switch to **Temperature + molar volume** mode to calculate pressure from $T$ and $v$. You can compare the ML model predictions with direct Peng–Robinson calculations, plot pressure curves, and download CSV results.
 
-### 2. Python API & Command-Line Interface
+### 2. Python API and Command-Line Tool
 
 Use Python 3.11 or newer:
 
@@ -75,31 +78,31 @@ In Python:
 from realgas_ml import GasModel
 from realgas_ml.peng_robinson import properties
 
-# Surrogate ML prediction + inverse P(T,v) solver
+# Predict properties with the trained ML model
 model = GasModel("CarbonDioxide")
 result = model.predict(T=400, P=2000000, n=2)
 print(result["fugacity_Pa"], result["phi"], result["H_J"], result["S_J_K"])
 print("Recovered P [Pa]:", model.pressure(T=400, v=result["v_m3_mol"]))
 
-# Direct analytical Peng-Robinson calculation (without loading ML model)
+# Calculate directly with Peng-Robinson (without loading an ML model)
 print(properties(400, 2000000, "CarbonDioxide"))
 ```
 
-Inputs use SI units: temperature in kelvin (`K`), pressure in pascals (`Pa`), and amount in moles (`mol`). Outputs include `Z`, `v_m3_mol`, `V_m3`, `rho_kg_m3`, `h_J_mol`, `s_J_mol_K`, `H_J`, `S_J_K`, `phi`, and `fugacity_Pa` (fugacity is an intensive state variable and does not scale with `n`).
+Inputs are in SI units: temperature in kelvin (`K`), pressure in pascals (`Pa`), and amount in moles (`mol`). Note that fugacity (`fugacity_Pa`) is an intensive property, so it is not multiplied by the number of moles `n`.
 
-### 3. Training, Data Export & Testing
+### 3. Training Models and Running Tests
 
 ```bash
-python train.py                                      # Regenerate all 15 datasets & models
-python train.py --gas CarbonDioxide                  # Train a single fluid
+python train.py                                      # Train models for all 15 gases
+python train.py --gas CarbonDioxide                  # Train a single gas
 python export_data.py --gas CarbonDioxide --output co2.csv
 python -m pip install ".[test]"
 python -m pytest -q                                  # Run all 47 automated tests
 ```
 
-## Supported Fluids & Operating Domains
+## Selected Gases and Operating Ranges
 
-All 15 pure fluids operate over $P \in [1.0, 50.0]\;\text{bar}$ ($[10^5, 5\times 10^6]\;\text{Pa}$) and strictly supercritical temperatures $T \ge \max(300.0\;\text{K}, 1.10\,T_c)$ as specified in [`realgas_ml/data/fluid_parameters.json`](realgas_ml/data/fluid_parameters.json):
+All 15 pure gases operate over $P \in [1.0, 50.0]\;\text{bar}$ ($[10^5, 5\times 10^6]\;\text{Pa}$) and supercritical temperatures $T \ge \max(300.0\;\text{K}, 1.10\,T_c)$ as listed in [`realgas_ml/data/fluid_parameters.json`](realgas_ml/data/fluid_parameters.json):
 
 | Fluid | Species | $M$ ($\text{g/mol}$) | $T_c$ ($\text{K}$) | $P_c$ ($\text{bar}$) | $\omega$ | $T_{\min}$–$T_{\max}$ ($\text{K}$) | $T_r = T/T_c$ Range |
 | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -119,9 +122,9 @@ All 15 pure fluids operate over $P \in [1.0, 50.0]\;\text{bar}$ ($[10^5, 5\times
 | **SulfurDioxide** | $\text{SO}_2$ | 64.0638 | 430.6400 | 78.8658 | $0.25613$ | 473.70–524.00 | 1.10–1.22 |
 | **Water** | $\text{H}_2\text{O}$ | 18.0153 | 647.0960 | 220.6400 | $0.34429$ | 711.81–1100.06 | 1.10–1.70 |
 
-## Thermodynamic Formulation & Surrogate Architecture
+## Equations Used
 
-For molar volume $v$, the PR76 equation of state implemented in [`realgas_ml/peng_robinson.py`](realgas_ml/peng_robinson.py) is:
+For molar volume $v$, the Peng–Robinson (1976) equation of state in [`realgas_ml/peng_robinson.py`](realgas_ml/peng_robinson.py) is:
 
 $$P(T,v) = \frac{RT}{v - b} - \frac{a(T)}{v^2 + 2bv - b^2}, \qquad a(T) = 0.45724\,\frac{R^2T_c^2}{P_c}\left[1 + \kappa\left(1 - \sqrt{\frac{T}{T_c}}\right)\right]^2, \qquad b = 0.07780\,\frac{RT_c}{P_c}$$
 
@@ -131,13 +134,13 @@ where $\kappa = 0.37464 + 1.54226\,\omega - 0.26992\,\omega^2$. Defining $A = aP
 - $h_{\text{dep}} = RT(Z - 1) + \frac{T(da/dT) - a}{2\sqrt{2}b}L$
 - $s_{\text{dep}} = R\ln(Z - B) + \frac{da/dT}{2\sqrt{2}b}L$
 
-Ideal-gas $h_{\text{ig}}(T)$ and $s_{\text{ig}}(T)$ are integrated analytically from NASA7 polynomials relative to $h_{\text{ig}} = s_{\text{ig}} = 0$ at $300\;\text{K}$ and $1\;\text{bar}$. In [`realgas_ml/regressor.py`](realgas_ml/regressor.py), `LocalRBFRegressor` fits $\mathbf{y} = [\ln Z, h, s, \ln\phi]^\top$ over normalized $(T, \ln P) \in [0, 1]^2$ using a 48-neighbor local quintic radial basis function ($\varphi(r) = -r^5$) augmented by a degree-2 polynomial trend.
+Ideal-gas enthalpy and entropy changes ($h_{\text{ig}}, s_{\text{ig}}$) are integrated analytically from the NASA 7-coefficient polynomials starting from $h_{\text{ig}} = s_{\text{ig}} = 0$ at $300\;\text{K}$ and $1\;\text{bar}$, and the real-gas departures are added at the actual $(T, P)$ state. Each gas model in [`realgas_ml/regressor.py`](realgas_ml/regressor.py) uses local quintic RBF interpolation ($k=48$ nearest neighbors, degree-2 polynomial) over normalized $(T, \ln P) \in [0, 1]^2$ to predict $[\ln Z, h, s, \ln\phi]$.
 
 ## Validation Results
 
-All 47 automated tests pass (`pytest -q`). Across all 15 gases and both held-out interior ($N=2{,}048$) and boundary ($N=256$) test sets, the worst-case interpolation errors against direct PR76 are:
+All 47 automated tests pass (`pytest -q`). Across all 15 gases on both interior ($N=2{,}048$) and boundary ($N=256$) test sets, the largest errors compared to direct Peng–Robinson calculations are:
 
-| Quantity | Global Worst-Case Error | Pytest Gate |
+| Quantity | Largest Test Error | Test Threshold |
 | :--- | ---: | ---: |
 | `v_max_APE_percent` | `1.0365e-05 %` | `< 0.01 %` |
 | `fugacity_max_APE_percent` | `1.49849e-06 %` | `< 0.01 %` |
@@ -146,12 +149,12 @@ All 47 automated tests pass (`pytest -q`). Across all 15 gases and both held-out
 
 ![Validation Learning Curves](report/fig_learning_curves.png)
 
-![Held-Out Interior and Boundary Errors](report/fig_test_boundary_errors.png)
+![Interior and Boundary Test Errors](report/fig_test_boundary_errors.png)
 
-## Sources & Provenance
+## Sources
 
 - Peng, D.-Y., & Robinson, D. B. (1976), *A New Two-Constant Equation of State*: https://doi.org/10.1021/i160057a011
 - McBride, B. J., Gordon, S., & Reno, M. A. (1993), *NASA TM-4513*: https://ntrs.nasa.gov/citations/19940013151
-- Cantera 3.2.0 Species Thermodynamic Polynomials (`nasa_gas.yaml` & `critical-properties.yaml`): https://www.cantera.org/stable/reference/thermo/species-thermo.html
-- Maginn, E. J., *CBE 20260 Fugacity from Equations of State*: https://ejmaginn.github.io/CBE20260-notes/class34/fugacity-EOS.html
-- License notices for static coefficient tables are preserved in [`THIRD_PARTY_NOTICES.txt`](THIRD_PARTY_NOTICES.txt).
+- NASA 7-coefficient polynomial reference: https://www.cantera.org/stable/reference/thermo/species-thermo.html
+- Fugacity departure notes: https://ejmaginn.github.io/CBE20260-notes/class34/fugacity-EOS.html
+- License notices for the static NASA7 coefficient tables are in [`THIRD_PARTY_NOTICES.txt`](THIRD_PARTY_NOTICES.txt).
